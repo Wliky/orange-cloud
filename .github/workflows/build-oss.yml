@@ -41,11 +41,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Set up JDK 17
+      # 必须用 JetBrains Runtime 21：apps/android/gradle/gradle-daemon-jvm.properties
+      # 里声明了 Daemon JVM 条件 toolchainVendor=jetbrains + toolchainVersion=21，
+      # 而该文件不含下载 URL（toolchainUrl.*），Gradle 无法自动下载（会报
+      # "No defined toolchain download url for LINUX on x86_64"）。
+      # 因此这里直接提供匹配的 JBR 21，让自动探测即可命中条件。
+      - name: Set up JDK 21 (JetBrains Runtime, matches daemon JVM criteria)
         uses: actions/setup-java@v5
         with:
-          distribution: temurin
-          java-version: 17
+          distribution: jetbrains
+          java-version: '21'
+
+      - name: Register JBR 21 path for Gradle toolchain detection
+        run: |
+          mkdir -p "$HOME/.gradle"
+          echo "org.gradle.java.installations.paths=$JAVA_HOME" >> "$HOME/.gradle/gradle.properties"
+          echo "JAVA_HOME=$JAVA_HOME"
+          "$JAVA_HOME/bin/java" -version 2>&1
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
