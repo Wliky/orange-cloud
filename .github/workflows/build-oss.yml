@@ -17,15 +17,17 @@ name: Build Orange Cloud OSS (Full Pro) APK
 # 配了签名 -> 产出已签名的 oss release 包；未配 -> 自动退回 oss debug 包（debug 签名、同样全 Pro、可安装）。
 #
 # 登录（可选但建议）：oss 风味默认不带官方 OAuth Client，需自建 Cloudflare OAuth App + 回调中转
-# （见仓库 apps/web/README.md 与 CONTRIBUTING.md），再把 Client ID 配到仓库密钥 OAUTH_CLIENT_ID，
-# 工作流会把它烤进构建。不配也能编译且 Pro 已解锁，但 app 无法登录 Cloudflare 账号。
+# （见仓库 apps/web/README.md 与 CONTRIBUTING.md）。
+#   - Client ID 配到仓库 Secrets 的 OAUTH_CLIENT_ID，工作流会把它烤进构建。
+#   - 回调地址配到仓库 Variables 的 OAUTH_REDIRECT_URI（如 https://orange.005201.xyz/oauth/callback），
+#     由 BuildConfig 注入，不写死在源码里，上游同步不会覆盖。
+# 两者都不配也能编译且 Pro 已解锁，但 app 无法登录 Cloudflare 账号。
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
-  tags:
-    - 'v*'
+    tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -48,25 +50,35 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
-
-      - name: Decode signing keystore (only if provided)
-        if: ${{ secrets.SIGNING_KEYSTORE_BASE64 != '' }}
-        run: echo "${{ secrets.SIGNING_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/orangecloud.keystore"
-
-      - name: Write keystore.properties (only if provided)
-        if: ${{ secrets.SIGNING_KEYSTORE_BASE64 != '' }}
         run: |
-          printf 'storeFile=%s\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
-            "$RUNNER_TEMP/orangecloud.keystore" \
-            "${{ secrets.KEYSTORE_PASSWORD }}" \
-            "${{ secrets.KEY_ALIAS }}" \
-            "${{ secrets.KEY_PASSWORD }}" > apps/android/keystore.properties
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+
+      # 签名密钥经 Secrets 注入，绝不明文落库。有密钥 -> 写 keystore.properties 走 release 签名；
+      # 无密钥 -> 标记未签名，后面退回 oss debug 包。
+      - name: Prepare signing (if keystore provided)
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$SIGNING_KEYSTORE_BASE64" ]; then
+            echo "$SIGNING_KEYSTORE_BASE64" | base64 -d > apps/android/keystore.jks
+            printf 'storeFile=%s\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+              "$PWD/apps/android/keystore.jks" \
+              "$KEYSTORE_PASSWORD" \
+              "$KEY_ALIAS" \
+              "$KEY_PASSWORD" > apps/android/keystore.properties
+            echo "SIGNED=true" >> "$GITHUB_ENV"
+          else
+            echo "SIGNED=false" >> "$GITHUB_ENV"
+          fi
 
       - name: Determine build task
         id: buildtask
         run: |
-          if [ -n "${{ secrets.SIGNING_KEYSTORE_BASE64 }}" ]; then
+          if [ "$SIGNED" = "true" ]; then
             echo "task=assembleOssRelease" >> "$GITHUB_OUTPUT"
           else
             echo "task=assembleOssDebug" >> "$GITHUB_OUTPUT"
@@ -74,7 +86,18 @@ jobs:
 
       - name: Build (no local daemon)
         working-directory: apps/android
-        run: ./gradlew :app:${{ steps.buildtask.outputs.task }} -POAUTH_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}" --no-daemon
+        env:
+          OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
+          OAUTH_REDIRECT_URI: ${{ vars.OAUTH_REDIRECT_URI }}
+        run: |
+          EXTRA=""
+          if [ -n "$OAUTH_CLIENT_ID" ]; then
+            EXTRA="$EXTRA -POAUTH_CLIENT_ID=$OAUTH_CLIENT_ID"
+          fi
+          if [ -n "$OAUTH_REDIRECT_URI" ]; then
+            EXTRA="$EXTRA -POAUTH_REDIRECT_URI=$OAUTH_REDIRECT_URI"
+          fi
+          ./gradlew :app:${{ steps.buildtask.outputs.task }} $EXTRA --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

@@ -79,6 +79,9 @@ android {
         buildConfigField("String", "FCM_APP_ID", "\"${buildProp("FCM_APP_ID")}\"")
         buildConfigField("String", "FCM_API_KEY", "\"${buildProp("FCM_API_KEY")}\"")
         buildConfigField("String", "FCM_SENDER_ID", "\"${buildProp("FCM_SENDER_ID")}\"")
+
+        // OAuth 回调地址：默认官方中转；oss 自编译者在 local.properties / -POAUTH_REDIRECT_URI 覆盖。
+        buildConfigField("String", "OAUTH_REDIRECT_URI", "\"${buildProp("OAUTH_REDIRECT_URI", "https://o-c.do/oauth/callback")}\"")
     }
 
     flavorDimensions += "distribution"

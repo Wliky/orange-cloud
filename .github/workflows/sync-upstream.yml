@@ -1,0 +1,55 @@
+name: Sync upstream (every 7 days)
+
+# 每 7 天把上游 chen2he/orange-cloud 的 main 合并进本 fork 的 main，保持与上游同步。
+# 关键保护：合并用 `git merge -X ours`，遇到冲突时**保留本 fork 的版本**，
+# 因此 OAuthConfig.kt / build.gradle.kts / .github/workflows/* 等自改文件不会被上游覆盖。
+# 非冲突的上游改动正常并入。
+#
+# 自定义值（OAuth Client ID、回调地址）都放在仓库 Secrets / Variables 里、不进源码，
+# 所以无论如何同步都不会丢失。
+#
+# 触发：定时（UTC 每 7 天 04:00）+ 手动 Run workflow。
+
+on:
+  schedule:
+    - cron: '0 4 */7 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Merge upstream/main into fork main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout fork main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/chen2he/orange-cloud.git \
+            || git remote set-url upstream https://github.com/chen2he/orange-cloud.git
+          git fetch upstream --tags
+
+      - name: Merge upstream/main (keep our fork changes on conflict)
+        run: |
+          if git merge upstream/main -X ours --no-edit; then
+            echo "Merge succeeded."
+          else
+            echo "Merge conflict could not be auto-resolved; aborting to avoid partial push."
+            git merge --abort || true
+            exit 1
+          fi
+
+      - name: Push to fork main
+        run: git push origin main
