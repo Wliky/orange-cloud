@@ -2,6 +2,7 @@ package jiamin.chen.orangecloud.core.auth
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -127,6 +128,8 @@ class AuthRepository @Inject constructor(
         val result = runCatching { withContext(NonCancellable) { performRedirect(uri) } }
         result.exceptionOrNull()?.let { e ->
             val reason = (e as? OAuthRedirectException)?.reason ?: e.message ?: "error"
+            // 自编译排障：把真实失败原因打到 logcat（UI 只显示通用文案）
+            Log.e("OC-OAuth", "redirect failed: reason=$reason uri=$uri", e)
             _state.value = _state.value.copy(redirectError = reason)
         }
         return result
