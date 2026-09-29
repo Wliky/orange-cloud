@@ -9,6 +9,11 @@ name: Build Orange Cloud OSS (Full Pro) APK
 #   - 手动在 Actions 页点 Run workflow
 #   - 推送 v* 标签时，除了出包还会自动发布一个 GitHub Release
 #
+# 去重：GitHub 把“推 commit 到 main”与“推 v* 标签”视为两个独立 push 事件。
+# 同一提交既推 main 又打标签时会并行跑两次构建，内容完全一样。
+# 这里让分支那次在检测到“该提交已有标签”时主动跳过，由标签那次负责出包 + 发 Release；
+# main 的单独推送（含上游自动同步 merge）仍会正常构建。
+#
 # 签名（可选但推荐）：在仓库 Settings -> Secrets and variables -> Actions 中配置：
 #   SIGNING_KEYSTORE_BASE64 : 你本地 keystore 文件的 base64（单行）
 #   KEYSTORE_PASSWORD       : keystore 口令
@@ -40,6 +45,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          # 需要全部 tag（含指向历史提交的），否则下面的去重判断拿不到标签列表
+          fetch-depth: 0
+
+      # 去重守卫：分支构建时，若本提交已经带着 v* 标签，就不再重复构建。
+      # 标签事件（ref_type=tag）永远不跳过 —— 出包与发 Release 由它负责。
+      - name: Skip duplicate build when this commit is already tagged
+        id: guard
+        run: |
+          if [ "${{ github.ref_type }}" = "branch" ] && [ -n "$(git tag --points-at "$GITHUB_SHA")" ]; then
+            TAGS=$(git tag --points-at "$GITHUB_SHA" | tr '\n' ' ')
+            echo "::notice::提交 $GITHUB_SHA 已带标签（$TAGS），跳过 main 分支的重复构建；由标签触发的那次运行负责出包与发布 Release。"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
 
       # 必须用 JetBrains Runtime 21：apps/android/gradle/gradle-daemon-jvm.properties
       # 里声明了 Daemon JVM 条件 toolchainVendor=jetbrains + toolchainVersion=21，
@@ -47,12 +68,14 @@ jobs:
       # "No defined toolchain download url for LINUX on x86_64"）。
       # 因此这里直接提供匹配的 JBR 21，让自动探测即可命中条件。
       - name: Set up JDK 21 (JetBrains Runtime, matches daemon JVM criteria)
+        if: steps.guard.outputs.skip != 'true'
         uses: actions/setup-java@v5
         with:
           distribution: jetbrains
           java-version: '21'
 
       - name: Register JBR 21 path for Gradle toolchain detection
+        if: steps.guard.outputs.skip != 'true'
         run: |
           mkdir -p "$HOME/.gradle"
           echo "org.gradle.java.installations.paths=$JAVA_HOME" >> "$HOME/.gradle/gradle.properties"
@@ -60,9 +83,11 @@ jobs:
           "$JAVA_HOME/bin/java" -version 2>&1
 
       - name: Setup Android SDK
+        if: steps.guard.outputs.skip != 'true'
         uses: android-actions/setup-android@v4
 
       - name: Install Android SDK packages
+        if: steps.guard.outputs.skip != 'true'
         run: |
           yes | sdkmanager --licenses >/dev/null 2>&1 || true
           sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
@@ -70,6 +95,7 @@ jobs:
       # 签名密钥经 Secrets 注入，绝不明文落库。有密钥 -> 写 keystore.properties 走 release 签名；
       # 无密钥 -> 标记未签名，后面退回 oss debug 包。
       - name: Prepare signing (if keystore provided)
+        if: steps.guard.outputs.skip != 'true'
         env:
           SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -89,6 +115,7 @@ jobs:
           fi
 
       - name: Determine build task
+        if: steps.guard.outputs.skip != 'true'
         id: buildtask
         run: |
           if [ "$SIGNED" = "true" ]; then
@@ -98,6 +125,7 @@ jobs:
           fi
 
       - name: Build (no local daemon)
+        if: steps.guard.outputs.skip != 'true'
         working-directory: apps/android
         env:
           OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
@@ -114,6 +142,7 @@ jobs:
 
       # 构建后立刻校验签名并打印签名证书指纹，便于确认用的就是自己的 keystore。
       - name: Verify APK signature (print signer certs)
+        if: steps.guard.outputs.skip != 'true'
         run: |
           APK=$(ls apps/android/app/build/outputs/apk/oss/release/*.apk 2>/dev/null | head -1)
           if [ -n "$APK" ]; then
@@ -127,6 +156,7 @@ jobs:
       # 不硬编码版本号：build.gradle.kts 中 versionName=2.1.3 + oss 风味 versionNameSuffix=-oss
       # => APK 实际版本 2.1.3-oss，产物命名即为 orange-cloud-2.1.3-oss.apk。
       - name: Resolve app version from built APK
+        if: steps.guard.outputs.skip != 'true'
         id: ver
         run: |
           APK=$(find apps/android/app/build/outputs/apk/oss -name '*.apk' | head -1)
@@ -147,12 +177,14 @@ jobs:
           ls -l dist
 
       - name: Upload APK artifact
+        if: steps.guard.outputs.skip != 'true'
         uses: actions/upload-artifact@v6
         with:
           name: orange-cloud-oss-${{ steps.ver.outputs.version }}
           path: dist/*.apk
           if-no-files-found: error
 
+      # 仅在 tag 事件下发布；分支事件被守卫跳过后不会走到这里
       - name: Publish GitHub Release (on tag)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v3
