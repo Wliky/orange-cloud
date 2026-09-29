@@ -112,8 +112,19 @@ jobs:
           fi
           ./gradlew :app:${{ steps.buildtask.outputs.task }} $EXTRA --no-daemon
 
+      # 构建后立刻校验签名并打印签名证书指纹，便于确认用的就是自己的 keystore。
+      - name: Verify APK signature (print signer certs)
+        run: |
+          APK=$(ls apps/android/app/build/outputs/apk/oss/release/*.apk 2>/dev/null | head -1)
+          if [ -n "$APK" ]; then
+            BT=$(ls -d "$ANDROID_HOME"/build-tools/* 2>/dev/null | sort -V | tail -1)
+            "$BT/apksigner" verify --print-certs -v "$APK" || exit 1
+          else
+            echo "未产出 release APK（走的是 debug 兜底），跳过签名校验。"
+          fi
+
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: orange-cloud-oss-apk
           path: apps/android/app/build/outputs/apk/oss/**/*.apk
@@ -121,6 +132,6 @@ jobs:
 
       - name: Publish GitHub Release (on tag)
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: apps/android/app/build/outputs/apk/oss/**/*.apk
