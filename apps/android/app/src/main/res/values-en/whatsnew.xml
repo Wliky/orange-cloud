@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- ⚠️ 自动生成 —— 请勿手改。改 packages/changelog/android.json 后运行 `pnpm changelog:gen`。 -->
 <resources>
+    <string name="whatsnew_2_2_0_0_title">AI crawlers by type</string>
+    <string name="whatsnew_2_2_0_0_detail">Set AI Search, AI Assistants &amp; Agents and AI Training crawlers separately, and let Cloudflare generate robots.txt from your preferences. Session-level bot detection (Precursor) is new too.</string>
+    <string name="whatsnew_2_2_0_1_title">Workers issues at a glance</string>
+    <string name="whatsnew_2_2_0_1_detail">Uncaught exceptions, 5xx responses and error logs from your Workers are grouped into issues you can resolve or ignore. Worker details now list preview URLs too.</string>
+    <string name="whatsnew_2_2_0_2_title">Security Insights</string>
+    <string name="whatsnew_2_2_0_2_detail">Scan a domain for security issues in one tap, then review and dismiss them by severity.</string>
+    <string name="whatsnew_2_2_0_3_title">Deeper traffic analytics</string>
+    <string name="whatsnew_2_2_0_3_detail">New Traffic Breakdown by country or region, status code, path and hostname, plus Security Events.</string>
+    <string name="whatsnew_2_2_0_4_title">Cache and rules</string>
+    <string name="whatsnew_2_2_0_4_detail">Mark cached content as stale so it revalidates with your origin instead of being purged. Cache Response Rules are new, and WAF and cache rules can be validated before you save.</string>
+    <string name="whatsnew_2_2_0_5_title">Storage, DNS and domains</string>
+    <string name="whatsnew_2_2_0_5_detail">R2 buckets and KV namespaces with EU or US data residency are supported, and R2 shows upload and download bandwidth. DNS flags records shadowed by an NS delegation, and you can search for new domains with prices.</string>
+    <string name="whatsnew_2_2_0_6_title">Steadier</string>
+    <string name="whatsnew_2_2_0_6_detail">AI content switches that can’t be turned on are hidden on the Free plan, permission errors link to the permissions you need, and D1 explains when the free daily limit is reached; editing a DNS record no longer lets you change its type, which Cloudflare no longer allows.</string>
     <string name="whatsnew_2_1_2_0_title">Trigger rules are now editable</string>
     <string name="whatsnew_2_1_2_0_detail">A snippet’s trigger rules were read-only — any change meant a detour through the web dashboard. You can now add, edit, toggle and delete them right here, and every change keeps the rules in their original order.</string>
     <string name="whatsnew_2_1_0_0_title">Manage Turnstile from your pocket</string>

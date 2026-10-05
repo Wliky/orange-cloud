@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- ⚠️ 自动生成 —— 请勿手改。改 packages/changelog/android.json 后运行 `pnpm changelog:gen`。 -->
 <resources>
+    <string name="whatsnew_2_2_0_0_title">AI 크롤러 유형별 관리</string>
+    <string name="whatsnew_2_2_0_0_detail">AI 검색, AI 어시스턴트 및 에이전트, AI 학습 크롤러를 각각 설정하고 설정에 따라 robots.txt를 자동으로 생성할 수 있습니다. 세션 단위 봇 탐지(Precursor)도 추가되었습니다.</string>
+    <string name="whatsnew_2_2_0_1_title">Workers 문제 한눈에 보기</string>
+    <string name="whatsnew_2_2_0_1_detail">Worker의 처리되지 않은 예외, 5xx 응답, 오류 로그를 문제로 묶어 해결됨으로 표시하거나 무시할 수 있습니다. Worker 상세 화면에서 미리보기 URL도 확인할 수 있습니다.</string>
+    <string name="whatsnew_2_2_0_2_title">보안 인사이트</string>
+    <string name="whatsnew_2_2_0_2_detail">한 번의 탭으로 도메인의 보안 문제를 검사하고 심각도별로 확인하고 처리할 수 있습니다.</string>
+    <string name="whatsnew_2_2_0_3_title">더 자세한 트래픽 분석</string>
+    <string name="whatsnew_2_2_0_3_detail">국가/지역, 상태 코드, 경로, 호스트 이름별 접속 세부 정보와 보안 이벤트가 추가되었습니다.</string>
+    <string name="whatsnew_2_2_0_4_title">캐시와 규칙</string>
+    <string name="whatsnew_2_2_0_4_detail">캐시를 만료로 표시하면 삭제하지 않고 원본 서버에서 재검증한 뒤 갱신합니다. 캐시 응답 규칙이 추가되었고, WAF와 캐시 규칙은 저장 전에 검증할 수 있습니다.</string>
+    <string name="whatsnew_2_2_0_5_title">스토리지, DNS, 도메인</string>
+    <string name="whatsnew_2_2_0_5_detail">EU·미국 데이터 저장 위치를 지정한 R2 버킷과 KV 네임스페이스를 지원하며, R2에서 업로드·다운로드 대역폭을 확인할 수 있습니다. DNS는 NS 위임으로 가려진 레코드를 표시하고, 새 도메인을 가격과 함께 검색할 수 있습니다.</string>
+    <string name="whatsnew_2_2_0_6_title">안정성 향상</string>
+    <string name="whatsnew_2_2_0_6_detail">무료 플랜에서는 켤 수 없는 AI 콘텐츠 스위치를 숨기고, 권한 오류에서 필요한 권한을 바로 확인할 수 있으며, D1 무료 한도에 도달하면 명확히 안내합니다; DNS 레코드를 편집할 때 더 이상 유형을 바꿀 수 없습니다(Cloudflare에서 더 이상 지원하지 않음).</string>
     <string name="whatsnew_2_1_2_0_title">트리거 규칙을 앱에서 관리</string>
     <string name="whatsnew_2_1_2_0_detail">Snippet의 트리거 규칙은 보기만 가능해 수정하려면 웹 대시보드로 돌아가야 했습니다. 이제 앱에서 바로 추가·편집·사용/해제·삭제할 수 있고 규칙 순서도 그대로 유지됩니다.</string>
     <string name="whatsnew_2_1_0_0_title">Turnstile을 주머니 속에서 관리</string>

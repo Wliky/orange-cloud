@@ -9,9 +9,11 @@ import jiamin.chen.orangecloud.core.auth.Scopes
 import jiamin.chen.orangecloud.data.model.R2Catalog
 import jiamin.chen.orangecloud.data.model.R2CatalogNamespace
 import jiamin.chen.orangecloud.data.repository.R2CatalogRepository
+import jiamin.chen.orangecloud.data.model.R2Bandwidth
 import jiamin.chen.orangecloud.data.model.R2BucketUsage
 import jiamin.chen.orangecloud.data.model.R2CorsRule
 import jiamin.chen.orangecloud.data.model.R2CustomDomain
+import jiamin.chen.orangecloud.data.model.R2Jurisdiction
 import jiamin.chen.orangecloud.data.repository.AccountStore
 import jiamin.chen.orangecloud.data.repository.StorageRepository
 import kotlinx.coroutines.channels.Channel
@@ -40,6 +42,8 @@ data class R2BucketSettingsUiState(
     val corsLoaded: Boolean = false,
     /** 本桶用量（best-effort GraphQL，免费账号常被 authz 挡 → null 不显示）。 */
     val usage: R2BucketUsage? = null,
+    /** 本桶近 30 天带宽（best-effort，同上）。 */
+    val bandwidth: R2Bandwidth? = null,
     val isLoading: Boolean = false,
     val isTogglingPublic: Boolean = false,
     val missingScope: Boolean = false,
@@ -68,6 +72,8 @@ class R2BucketSettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val bucket: String = checkNotNull(savedStateHandle["bucket"])
+    /** 区域限制桶的 jurisdiction，默认区域为 null；公开访问 / 自定义域 / CORS 都是桶级调用，须透传。 */
+    private val jurisdiction: String? = R2Jurisdiction.normalize(savedStateHandle.get<String>("jurisdiction"))
     private val hasRead = authRepository.hasScope(Scopes.R2_READ)
     private val canWrite = authRepository.hasScope(Scopes.R2_WRITE)
     // 数据目录是另一条权限链路（r2-catalog.*），与 workers-r2.* 无关
@@ -105,18 +111,23 @@ class R2BucketSettingsViewModel @Inject constructor(
                 return@launch
             }
             // 三项各自独立、best-effort：单项失败（如 CORS 未设置）不影响其它。
-            runCatching { storageRepository.managedDomain(accountId, bucket) }.getOrNull()?.let { md ->
+            runCatching { storageRepository.managedDomain(accountId, bucket, jurisdiction) }.getOrNull()?.let { md ->
                 _uiState.update { it.copy(publicEnabled = md.enabled ?: false, publicDomain = md.domain, publicLoaded = true) }
             }
-            runCatching { storageRepository.customDomains(accountId, bucket) }.getOrNull()?.let { domains ->
+            runCatching { storageRepository.customDomains(accountId, bucket, jurisdiction) }.getOrNull()?.let { domains ->
                 _uiState.update { it.copy(customDomains = domains) }
             }
-            runCatching { storageRepository.corsPolicy(accountId, bucket) }.getOrNull()?.let { cors ->
+            runCatching { storageRepository.corsPolicy(accountId, bucket, jurisdiction) }.getOrNull()?.let { cors ->
                 _uiState.update { it.copy(corsRules = cors.rules.orEmpty(), corsLoaded = true) }
             }
-            // 用量是附加信息：account-analytics 常被 authz 挡，失败即不显示。
-            runCatching { storageRepository.r2UsageByBucket(accountId)[bucket] }.getOrNull()?.let { u ->
+            // 用量 / 带宽是附加信息：account-analytics 常被 authz 挡，失败即不显示。
+            // GraphQL 里区域桶的 bucketName 带「区域_」前缀（eu_xxx），按桶匹配 / 过滤都用这个形式。
+            val analyticsName = R2Jurisdiction.analyticsBucketName(bucket, jurisdiction)
+            runCatching { storageRepository.r2UsageByBucket(accountId)[analyticsName] }.getOrNull()?.let { u ->
                 _uiState.update { it.copy(usage = u) }
+            }
+            runCatching { storageRepository.r2Bandwidth(accountId, analyticsName) }.getOrNull()?.let { bw ->
+                _uiState.update { it.copy(bandwidth = bw) }
             }
             _uiState.update { it.copy(isLoading = false) }
         }
@@ -128,7 +139,7 @@ class R2BucketSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val accountId = accountStore.selectedAccountId.value ?: error("no account")
-                storageRepository.setManagedDomainEnabled(accountId, bucket, enabled)
+                storageRepository.setManagedDomainEnabled(accountId, bucket, enabled, jurisdiction)
                 _uiState.update { it.copy(publicEnabled = enabled) }
             } catch (e: Exception) {
                 eventChannel.send(BucketSettingsEvent.Error(e.message))
@@ -143,7 +154,7 @@ class R2BucketSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val accountId = accountStore.selectedAccountId.value ?: error("no account")
-                storageRepository.removeCustomDomain(accountId, bucket, domain)
+                storageRepository.removeCustomDomain(accountId, bucket, domain, jurisdiction)
                 _uiState.update { it.copy(customDomains = it.customDomains.filterNot { d -> d.domain == domain }) }
                 eventChannel.send(BucketSettingsEvent.DomainRemoved)
             } catch (e: Exception) {
@@ -157,7 +168,7 @@ class R2BucketSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val accountId = accountStore.selectedAccountId.value ?: error("no account")
-                storageRepository.deleteCorsPolicy(accountId, bucket)
+                storageRepository.deleteCorsPolicy(accountId, bucket, jurisdiction)
                 _uiState.update { it.copy(corsRules = emptyList()) }
                 eventChannel.send(BucketSettingsEvent.CorsCleared)
             } catch (e: Exception) {

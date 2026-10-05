@@ -1,0 +1,6 @@
+• Rastreadores de IA por tipo: pesquisa, assistentes e agentes, e treino separados; robots.txt pelas preferências; deteção de bots por sessão
+• Problemas dos Workers: erros agrupados para resolver ou ignorar
+• Informações de segurança: analise um domínio com um toque
+• Detalhes do tráfego e eventos de segurança
+• Cache expirada, regras de resposta da cache, validação de regras
+• R2 e KV na UE/EUA, largura de banda do R2, registos DNS sombreados, pesquisa de domínios

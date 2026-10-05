@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jiamin.chen.orangecloud.core.auth.AuthRepository
 import jiamin.chen.orangecloud.core.auth.Scopes
+import jiamin.chen.orangecloud.core.design.RuleValidation
+import jiamin.chen.orangecloud.core.network.cfDocumentationUrl
 import jiamin.chen.orangecloud.data.model.WafRule
 import jiamin.chen.orangecloud.data.model.WafRuleCreate
 import jiamin.chen.orangecloud.data.repository.SecurityRepository
@@ -22,7 +24,7 @@ import javax.inject.Inject
 sealed interface WafEvent {
     data object Saved : WafEvent
     data object Deleted : WafEvent
-    data class Error(val message: String?) : WafEvent
+    data class Error(val message: String?, val documentationUrl: String? = null) : WafEvent
 }
 
 data class WafUiState(
@@ -122,7 +124,7 @@ class WafRulesViewModel @Inject constructor(
                 _uiState.update { it.copy(rules = updated.rules.orEmpty(), rulesetId = updated.id) }
                 eventChannel.send(WafEvent.Saved)
             } catch (e: Exception) {
-                eventChannel.send(WafEvent.Error(e.message))
+                eventChannel.send(WafEvent.Error(e.message, e.cfDocumentationUrl))
             } finally {
                 _uiState.update { it.copy(isSaving = false) }
             }
@@ -141,9 +143,34 @@ class WafRulesViewModel @Inject constructor(
                 _uiState.update { it.copy(rules = updated.rules.orEmpty(), rulesetId = updated.id) }
                 eventChannel.send(WafEvent.Saved)
             } catch (e: Exception) {
-                eventChannel.send(WafEvent.Error(e.message))
+                eventChannel.send(WafEvent.Error(e.message, e.cfDocumentationUrl))
             } finally {
                 _uiState.update { it.copy(isSaving = false) }
+            }
+        }
+    }
+
+    fun clearValidation() = _uiState.update { it.copy(validation = null) }
+
+    /**
+     * 校验（dry_run）：ruleId 为空按新建（无规则集时走建集请求），否则按整条 PATCH，
+     * 与保存发完全相同的请求体，只是不落盘。保存流程不受影响。
+     */
+    fun validate(ruleId: String?, action: String, expression: String, description: String, enabled: Boolean) {
+        if (!canWrite || _uiState.value.validation == RuleValidation.Running) return
+        _uiState.update { it.copy(validation = RuleValidation.Running) }
+        viewModelScope.launch {
+            val rule = WafRuleCreate(action, expression.trim(), description.trim().ifBlank { null }, enabled)
+            val result = runCatching {
+                securityRepository.validateRule(zoneId, _uiState.value.rulesetId, ruleId, rule)
+            }
+            _uiState.update {
+                it.copy(
+                    validation = result.fold(
+                        onSuccess = { RuleValidation.Passed },
+                        onFailure = { e -> RuleValidation.Failed(e.message) },
+                    ),
+                )
             }
         }
     }
@@ -157,7 +184,7 @@ class WafRulesViewModel @Inject constructor(
                 _uiState.update { it.copy(rules = it.rules.filterNot { r -> r.id == rule.id }) }
                 eventChannel.send(WafEvent.Deleted)
             } catch (e: Exception) {
-                eventChannel.send(WafEvent.Error(e.message))
+                eventChannel.send(WafEvent.Error(e.message, e.cfDocumentationUrl))
                 load()
             }
         }

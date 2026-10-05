@@ -2,7 +2,7 @@
 //  ZoneActionsViewModel.swift
 //  Orange Cloud
 //
-//  Zone 详情页「操作」区：Under Attack / 开发模式 / 暂停 Cloudflare 开关 + 缓存清理，
+//  Zone 详情页「操作」区：Under Attack / 开发模式 / 暂停 Cloudflare 开关 + 缓存清理 / 标记过期，
 //  以及「AI 内容控制」区：AI 训练重定向 / 面向 Agent 的 Markdown。
 //
 //  注意暂停态与另两个开关的数据源不同：Under Attack / 开发模式读写 zone settings
@@ -23,14 +23,16 @@ final class ZoneActionsViewModel {
     /// 是否暂停 Cloudflare 代理。初值取自本地缓存，进页后再用 API 校准。
     private(set) var paused: Bool
 
-    // MARK: AI 内容控制（Pro/Business 起；免费套餐读取即失败，整卡隐藏）
+    // MARK: AI 内容控制（Pro 起；免费套餐读得到但不可改，对应开关隐藏）
 
     /// Redirects for AI Training —— 把 AI 训练类爬虫重定向走
     private(set) var aiTrainingRedirect = false
     /// Markdown for Agents —— 按 Accept: text/markdown 把 HTML 转 Markdown 供 agent 消费
     private(set) var markdownForAgents = false
-    /// 两项中至少一项读到了，才认为该 Zone 支持这组设置
-    private(set) var aiSettingsAvailable = false
+    /// 上面两项各自读到且可改才显示
+    private(set) var aiTrainingRedirectAvailable = false
+    private(set) var markdownForAgentsAvailable = false
+    var aiSettingsAvailable: Bool { aiTrainingRedirectAvailable || markdownForAgentsAvailable }
 
     // MARK: 机器人管控（bot-management.read/.write，全套餐可用）
 
@@ -46,6 +48,21 @@ final class ZoneActionsViewModel {
     private(set) var managedRobotsTxt = false
     private(set) var botConfigLoaded = false
 
+    // 2026-09 拆分后的三项 AI 爬虫策略（原始取值，未知档位原样保留）。
+    // 响应带任一项即 usesAICrawlerPolicies，UI 用三个选择行替换旧「AI 爬虫」。
+    private(set) var aiSearch: String?
+    private(set) var aiUser: String?
+    private(set) var aiTraining: String?
+    private(set) var usesAICrawlerPolicies = false
+    /// Bot Preference Sync（按偏好生成 robots.txt）；nil = 响应未带该字段，UI 回退旧「托管 robots.txt」
+    private(set) var botPreferenceSync: Bool?
+
+    // MARK: 会话级机器人检测（Precursor，precursor.read/.write）
+
+    /// default_mode 原始取值；nil = 未加载 / 读取失败（行整体隐藏）
+    private(set) var precursorMode: String?
+    var isUpdatingPrecursor = false
+
     var isTogglingUnderAttack = false
     var isTogglingDevMode = false
     var isTogglingAITrainingRedirect = false
@@ -55,23 +72,27 @@ final class ZoneActionsViewModel {
     var isTogglingPause = false
     var isPurging = false
     var didPurge = false       // sensoryFeedback / 提示触发器
+    var didInvalidate = false  // 「已标记为过期」提示触发器
     var error: String?
 
     private let service: ZoneSettingsService
     private let zoneService: ZoneService
     private let botService: BotManagementService
+    private let precursorService: PrecursorService
     private let zoneId: String
 
     init(
         service: ZoneSettingsService,
         zoneService: ZoneService,
         botService: BotManagementService,
+        precursorService: PrecursorService,
         zoneId: String,
         paused: Bool = false
     ) {
         self.service = service
         self.zoneService = zoneService
         self.botService = botService
+        self.precursorService = precursorService
         self.zoneId = zoneId
         self.paused = paused
     }
@@ -87,18 +108,18 @@ final class ZoneActionsViewModel {
         settingsLoaded = true
     }
 
-    /// 读 AI 内容控制两项。免费套餐不支持这两个 setting，读取会失败——
-    /// 此时 aiSettingsAvailable 保持 false，调用方整卡隐藏，不给用户一个永远打不开的锁。
+    /// 读 AI 内容控制两项。免费套餐也读得到值，只是 editable == false、一写就 400——
+    /// 读不到或不可改都当不支持，隐藏对应开关，不给用户一个永远打不开的锁。
     func loadAISettings() async {
         guard !aiSettingsAvailable else { return }
-        async let redirectTask = service.getSetting(zoneId: zoneId, setting: "redirects_for_ai_training")
-        async let converterTask = service.getSetting(zoneId: zoneId, setting: "content_converter")
+        async let redirectTask = service.getSettingIfEditable(zoneId: zoneId, setting: "redirects_for_ai_training")
+        async let converterTask = service.getSettingIfEditable(zoneId: zoneId, setting: "content_converter")
         let redirect = try? await redirectTask
         let converter = try? await converterTask
-        guard redirect != nil || converter != nil else { return }
         aiTrainingRedirect = redirect == "on"
         markdownForAgents = converter == "on"
-        aiSettingsAvailable = true
+        aiTrainingRedirectAvailable = redirect != nil
+        markdownForAgentsAvailable = converter != nil
     }
 
     /// 读机器人管控配置。四种套餐形态共用 base_config，任何套餐都能读到。
@@ -115,6 +136,11 @@ final class ZoneActionsViewModel {
         contentBotsProtection = config.contentBotsProtection == "block"
         robotsLicense         = config.cfRobotsVariant == "policy_only"
         managedRobotsTxt      = config.isRobotsTxtManaged == true
+        aiSearch              = config.aiSearch
+        aiUser                = config.aiUser
+        aiTraining            = config.aiTraining
+        usesAICrawlerPolicies = config.hasAICrawlerPolicies
+        botPreferenceSync     = config.botPreferenceSyncEnabled
     }
 
     /// 写单个字段。PUT 是合并语义，只发改动的那一个，不会动 sbfm_* 等套餐专属配置。
@@ -151,6 +177,40 @@ final class ZoneActionsViewModel {
 
     func setManagedRobotsTxt(_ on: Bool) async {
         await updateBot(.isRobotsTxtManaged, on)
+    }
+
+    /// 读会话级机器人检测的默认模式。失败（字段已 deprecated、无该能力等）保持 nil，行隐藏。
+    func loadPrecursor() async {
+        guard precursorMode == nil else { return }
+        precursorMode = try? await precursorService.config(zoneId: zoneId).defaultMode ?? PrecursorMode.off.rawValue
+    }
+
+    func setPrecursorMode(_ mode: PrecursorMode) async {
+        guard !isUpdatingPrecursor else { return }
+        isUpdatingPrecursor = true
+        error = nil
+        do {
+            precursorMode = try await precursorService.setMode(zoneId: zoneId, mode: mode).defaultMode ?? mode.rawValue
+        } catch {
+            self.error = error.localizedDescription
+        }
+        isUpdatingPrecursor = false
+    }
+
+    func setAISearch(_ policy: AICrawlerPolicy) async {
+        await updateBot(.aiSearch, policy.rawValue)
+    }
+
+    func setAIUser(_ policy: AICrawlerPolicy) async {
+        await updateBot(.aiUser, policy.rawValue)
+    }
+
+    func setAITraining(_ policy: AICrawlerPolicy) async {
+        await updateBot(.aiTraining, policy.rawValue)
+    }
+
+    func setBotPreferenceSync(_ on: Bool) async {
+        await updateBot(.botPreferenceSyncEnabled, on)
     }
 
     func setAITrainingRedirect(_ on: Bool) async {
@@ -245,50 +305,62 @@ final class ZoneActionsViewModel {
         }
     }
 
-    func purgeCache() async {
+    /// 全部缓存：清除（purge）或标记过期（invalidate）。两者同权限（cache.purge）、同限速。
+    func purgeCache(action: CacheClearAction = .purge) async {
         guard !isPurging else { return }
         isPurging = true
         error = nil
         do {
-            try await service.purgeAllCache(zoneId: zoneId)
-            didPurge.toggle()
+            try await service.purgeAllCache(zoneId: zoneId, action: action)
+            signalDone(action)
         } catch {
             self.error = error.localizedDescription
         }
         isPurging = false
     }
 
-    /// 按 URL 清理缓存（单文件 purge，调用方负责限制 ≤ 30 个 URL）
-    func purgeURLs(_ urls: [String]) async {
-        await runPurge(urls) { try await service.purgeFiles(zoneId: zoneId, urls: $0) }
+    /// 按 URL 清理 / 标记过期（单文件，调用方负责限制 ≤ 30 个 URL）
+    func purgeURLs(_ urls: [String], action: CacheClearAction = .purge) async {
+        await runPurge(urls, action) { try await service.purgeFiles(zoneId: zoneId, urls: $0, action: action) }
     }
 
-    /// 按 URL 前缀清理缓存（调用方负责限制 ≤ 30 个）
-    func purgePrefixes(_ prefixes: [String]) async {
-        await runPurge(prefixes) { try await service.purgePrefixes(zoneId: zoneId, prefixes: $0) }
+    /// 按 URL 前缀清理 / 标记过期（调用方负责限制 ≤ 30 个）
+    func purgePrefixes(_ prefixes: [String], action: CacheClearAction = .purge) async {
+        await runPurge(prefixes, action) { try await service.purgePrefixes(zoneId: zoneId, prefixes: $0, action: action) }
     }
 
-    /// 按主机名清理缓存（调用方负责限制 ≤ 30 个）
-    func purgeHosts(_ hosts: [String]) async {
-        await runPurge(hosts) { try await service.purgeHosts(zoneId: zoneId, hosts: $0) }
+    /// 按主机名清理 / 标记过期（调用方负责限制 ≤ 30 个）
+    func purgeHosts(_ hosts: [String], action: CacheClearAction = .purge) async {
+        await runPurge(hosts, action) { try await service.purgeHosts(zoneId: zoneId, hosts: $0, action: action) }
     }
 
-    /// 按 Cache-Tag 清理缓存（调用方负责限制 ≤ 30 个）
-    func purgeTags(_ tags: [String]) async {
-        await runPurge(tags) { try await service.purgeTags(zoneId: zoneId, tags: $0) }
+    /// 按 Cache-Tag 清理 / 标记过期（调用方负责限制 ≤ 30 个）
+    func purgeTags(_ tags: [String], action: CacheClearAction = .purge) async {
+        await runPurge(tags, action) { try await service.purgeTags(zoneId: zoneId, tags: $0, action: action) }
     }
 
-    /// 缓存清理统一执行：去重并发、清空错误、成功翻 didPurge 触发反馈
-    private func runPurge(_ items: [String], _ op: ([String]) async throws -> Void) async {
+    /// 缓存清理统一执行：去重并发、清空错误、成功按动作翻 didPurge / didInvalidate 触发反馈
+    private func runPurge(
+        _ items: [String],
+        _ action: CacheClearAction,
+        _ op: ([String]) async throws -> Void
+    ) async {
         guard !isPurging, !items.isEmpty else { return }
         isPurging = true
         error = nil
         do {
             try await op(items)
-            didPurge.toggle()
+            signalDone(action)
         } catch {
             self.error = error.localizedDescription
         }
         isPurging = false
+    }
+
+    private func signalDone(_ action: CacheClearAction) {
+        switch action {
+        case .purge:      didPurge.toggle()
+        case .invalidate: didInvalidate.toggle()
+        }
     }
 }

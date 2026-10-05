@@ -2,6 +2,9 @@
 //  R2Service.swift
 //  Orange Cloud
 //
+//  区域限制桶（EU / US / FedRAMP）：每个桶级调用都要带 cf-r2-jurisdiction 头，
+//  故桶级方法一律显式接收 jurisdiction（默认辖区传 nil，不发头）。
+//
 
 import Foundation
 
@@ -55,14 +58,18 @@ struct R2Service {
     }
 
     /// 删除桶（workers-r2.write）。Cloudflare 要求桶必须为空，否则报错。
-    func deleteBucket(accountId: String, name: String) async throws {
-        try await client.delete("accounts/\(accountId)/r2/buckets/\(name)")
+    func deleteBucket(accountId: String, name: String, jurisdiction: String?) async throws {
+        try await client.delete(
+            "accounts/\(accountId)/r2/buckets/\(name)",
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
+        )
     }
 
     /// 下载对象内容（原始字节）。key 含特殊字符需预编码。
-    func getObjectData(accountId: String, bucketName: String, key: String) async throws -> Data {
+    func getObjectData(accountId: String, bucketName: String, jurisdiction: String?, key: String) async throws -> Data {
         try await client.getRaw(
-            "accounts/\(accountId)/r2/buckets/\(bucketName)/objects/\(Self.encodeKey(key))"
+            "accounts/\(accountId)/r2/buckets/\(bucketName)/objects/\(Self.encodeKey(key))",
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
         )
     }
 
@@ -70,6 +77,7 @@ struct R2Service {
     func putObject(
         accountId: String,
         bucketName: String,
+        jurisdiction: String?,
         key: String,
         data: Data,
         contentType: String
@@ -77,7 +85,8 @@ struct R2Service {
         let response: CFAPIResponse<EmptyResponse> = try await client.putRaw(
             "accounts/\(accountId)/r2/buckets/\(bucketName)/objects/\(Self.encodeKey(key))",
             body: data,
-            contentType: contentType
+            contentType: contentType,
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
         )
         guard response.success else {
             throw response.toAPIError()
@@ -85,9 +94,10 @@ struct R2Service {
     }
 
     /// 删除对象
-    func deleteObject(accountId: String, bucketName: String, key: String) async throws {
+    func deleteObject(accountId: String, bucketName: String, jurisdiction: String?, key: String) async throws {
         try await client.delete(
-            "accounts/\(accountId)/r2/buckets/\(bucketName)/objects/\(Self.encodeKey(key))"
+            "accounts/\(accountId)/r2/buckets/\(bucketName)/objects/\(Self.encodeKey(key))",
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
         )
     }
 
@@ -122,7 +132,8 @@ struct R2Service {
         }
         let response: CFAPIResponseArray<R2Object> = try await client.get(
             "accounts/\(options.accountId)/r2/buckets/\(options.bucketName)/objects",
-            queryItems: queryItems
+            queryItems: queryItems,
+            headers: R2Bucket.headers(jurisdiction: options.jurisdiction)
         )
         guard response.success else {
             throw response.toAPIError()
@@ -145,19 +156,22 @@ struct R2Service {
     func copyObject(
         accountId: String,
         bucketName: String,
+        jurisdiction: String?,
         sourceKey: String,
         destinationKey: String,
         contentType: String,
         onProgress: @escaping @Sendable (Double) -> Void
     ) async throws {
         let base = "accounts/\(accountId)/r2/buckets/\(bucketName)/objects"
-        let tempURL = try await client.downloadToFile("\(base)/\(Self.encodeKey(sourceKey))")
+        let headers = R2Bucket.headers(jurisdiction: jurisdiction)
+        let tempURL = try await client.downloadToFile("\(base)/\(Self.encodeKey(sourceKey))", headers: headers)
         defer { try? FileManager.default.removeItem(at: tempURL) }
         onProgress(0.5)
         let response: CFAPIResponse<EmptyResponse> = try await client.putFile(
             "\(base)/\(Self.encodeKey(destinationKey))",
             fileURL: tempURL,
             contentType: contentType,
+            headers: headers,
             onProgress: { onProgress(0.5 + $0 * 0.5) }
         )
         guard response.success else { throw response.toAPIError() }
@@ -167,29 +181,32 @@ struct R2Service {
     func moveObject(
         accountId: String,
         bucketName: String,
+        jurisdiction: String?,
         sourceKey: String,
         destinationKey: String,
         contentType: String,
         onProgress: @escaping @Sendable (Double) -> Void
     ) async throws {
         try await copyObject(
-            accountId: accountId, bucketName: bucketName,
+            accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction,
             sourceKey: sourceKey, destinationKey: destinationKey,
             contentType: contentType, onProgress: onProgress
         )
-        guard try await objectExists(accountId: accountId, bucketName: bucketName, key: destinationKey) else {
+        guard try await objectExists(
+            accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction, key: destinationKey
+        ) else {
             throw APIError.cloudflareError(
                 code: 0,
                 message: String(localized: "复制后未在目标确认到对象，已保留原对象未删除")
             )
         }
-        try await deleteObject(accountId: accountId, bucketName: bucketName, key: sourceKey)
+        try await deleteObject(accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction, key: sourceKey)
     }
 
     /// 精确判断某 key 是否存在（client/v4 对象端点无 HEAD，用 prefix 列举核对）
-    func objectExists(accountId: String, bucketName: String, key: String) async throws -> Bool {
+    func objectExists(accountId: String, bucketName: String, jurisdiction: String?, key: String) async throws -> Bool {
         let page = try await listObjects(
-            R2ObjectListOptions(accountId: accountId, bucketName: bucketName, prefix: key)
+            R2ObjectListOptions(accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction, prefix: key)
         )
         return page.objects.contains { $0.key == key }
     }
@@ -201,59 +218,83 @@ struct R2Service {
     }
 
     /// 托管公开访问 URL（r2.dev）当前状态
-    func managedDomain(accountId: String, bucketName: String) async throws -> R2ManagedDomain {
+    func managedDomain(accountId: String, bucketName: String, jurisdiction: String?) async throws -> R2ManagedDomain {
         let response: CFAPIResponse<R2ManagedDomain> = try await client.get(
-            "\(bucketPath(accountId, bucketName))/domains/managed"
+            "\(bucketPath(accountId, bucketName))/domains/managed",
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
         )
         guard response.success, let domain = response.result else { throw response.toAPIError() }
         return domain
     }
 
     /// 启用 / 停用 r2.dev 公开访问
-    func setManagedDomainEnabled(accountId: String, bucketName: String, enabled: Bool) async throws {
+    func setManagedDomainEnabled(
+        accountId: String,
+        bucketName: String,
+        jurisdiction: String?,
+        enabled: Bool
+    ) async throws {
         let response: CFAPIResponse<EmptyResponse> = try await client.put(
             "\(bucketPath(accountId, bucketName))/domains/managed",
-            body: R2ManagedDomainUpdate(enabled: enabled)
+            body: R2ManagedDomainUpdate(enabled: enabled),
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
         )
         guard response.success else { throw response.toAPIError() }
     }
 
     /// 已连接的自定义域
-    func customDomains(accountId: String, bucketName: String) async throws -> [R2CustomDomain] {
+    func customDomains(accountId: String, bucketName: String, jurisdiction: String?) async throws -> [R2CustomDomain] {
         let response: CFAPIResponse<R2CustomDomainList> = try await client.get(
-            "\(bucketPath(accountId, bucketName))/domains/custom"
+            "\(bucketPath(accountId, bucketName))/domains/custom",
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
         )
         guard response.success, let list = response.result else { throw response.toAPIError() }
         return list.domains ?? []
     }
 
     /// 移除（断开）一个自定义域
-    func removeCustomDomain(accountId: String, bucketName: String, domain: String) async throws {
+    func removeCustomDomain(
+        accountId: String,
+        bucketName: String,
+        jurisdiction: String?,
+        domain: String
+    ) async throws {
         try await client.delete(
-            "\(bucketPath(accountId, bucketName))/domains/custom/\(Self.encodeKey(domain))"
+            "\(bucketPath(accountId, bucketName))/domains/custom/\(Self.encodeKey(domain))",
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
         )
     }
 
     /// 当前 CORS 策略（无策略时由调用方按空处理）
-    func corsPolicy(accountId: String, bucketName: String) async throws -> R2CorsPolicy {
+    func corsPolicy(accountId: String, bucketName: String, jurisdiction: String?) async throws -> R2CorsPolicy {
         let response: CFAPIResponse<R2CorsPolicy> = try await client.get(
-            "\(bucketPath(accountId, bucketName))/cors"
+            "\(bucketPath(accountId, bucketName))/cors",
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
         )
         guard response.success else { throw response.toAPIError() }
         return response.result ?? R2CorsPolicy(rules: nil)
     }
 
     /// 整体写入 CORS 策略（PUT 覆盖；R2 的 CORS 是整组替换）
-    func putCorsPolicy(accountId: String, bucketName: String, policy: R2CorsPolicy) async throws {
+    func putCorsPolicy(
+        accountId: String,
+        bucketName: String,
+        jurisdiction: String?,
+        policy: R2CorsPolicy
+    ) async throws {
         let response: CFAPIResponse<EmptyResponse> = try await client.put(
             "\(bucketPath(accountId, bucketName))/cors",
-            body: policy
+            body: policy,
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
         )
         guard response.success else { throw response.toAPIError() }
     }
 
     /// 清除 CORS 策略
-    func deleteCorsPolicy(accountId: String, bucketName: String) async throws {
-        try await client.delete("\(bucketPath(accountId, bucketName))/cors")
+    func deleteCorsPolicy(accountId: String, bucketName: String, jurisdiction: String?) async throws {
+        try await client.delete(
+            "\(bucketPath(accountId, bucketName))/cors",
+            headers: R2Bucket.headers(jurisdiction: jurisdiction)
+        )
     }
 }

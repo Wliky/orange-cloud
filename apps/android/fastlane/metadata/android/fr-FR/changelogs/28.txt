@@ -1,0 +1,6 @@
+• Robots d’IA par catégorie : recherche, assistants et agents, entraînement réglés séparément ; robots.txt selon vos préférences ; détection des bots par session
+• Problèmes des Workers : erreurs regroupées, à résoudre ou ignorer
+• Analyses de sécurité : analysez un domaine en un geste
+• Détail du trafic et événements de sécurité
+• Cache obsolète, règles de réponse du cache, validation des règles
+• R2 et KV UE/États-Unis, bande passante R2, DNS masqués, recherche de domaines

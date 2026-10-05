@@ -1,0 +1,6 @@
+• Türe göre yapay zekâ tarayıcıları: arama, asistanlar ve ajanlar, eğitim ayrı ayarlanır; tercihlere göre robots.txt; oturum düzeyinde bot algılama
+• Workers sorunları: hatalar gruplanır, çözülür ya da yok sayılır
+• Güvenlik içgörüleri: alan adını tek dokunuşla tarayın
+• Trafik dökümü ve güvenlik olayları
+• Önbelleği eskimiş işaretleme, önbellek yanıt kuralları, kural doğrulama
+• AB/ABD R2 ve KV, R2 bant genişliği, gölgelenen DNS kayıtları, alan adı arama

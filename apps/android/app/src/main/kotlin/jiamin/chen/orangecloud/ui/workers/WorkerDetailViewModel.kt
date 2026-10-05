@@ -8,11 +8,13 @@ import jiamin.chen.orangecloud.core.auth.AuthRepository
 import jiamin.chen.orangecloud.core.auth.Scopes
 import jiamin.chen.orangecloud.data.model.AnalyticsTimeRange
 import jiamin.chen.orangecloud.data.model.WorkerMetrics
+import jiamin.chen.orangecloud.data.model.WorkerPreview
 import jiamin.chen.orangecloud.data.model.WorkerScript
 import jiamin.chen.orangecloud.data.model.WorkerSeriesPoint
 import jiamin.chen.orangecloud.data.repository.AccountStore
 import jiamin.chen.orangecloud.data.repository.AnalyticsRepository
 import jiamin.chen.orangecloud.data.repository.WorkerRepository
+import jiamin.chen.orangecloud.data.repository.WorkersIssuesRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +41,7 @@ class WorkerDetailViewModel @Inject constructor(
     accountStore: AccountStore,
     private val workerRepository: WorkerRepository,
     private val analyticsRepository: AnalyticsRepository,
+    private val issuesRepository: WorkersIssuesRepository,
     authRepository: AuthRepository,
 ) : ViewModel() {
 
@@ -46,6 +49,16 @@ class WorkerDetailViewModel @Inject constructor(
     private val accountId: String? = accountStore.selectedAccountId.value
     val canViewMetrics: Boolean = authRepository.hasScope(Scopes.ANALYTICS_READ)
     val canWrite: Boolean = authRepository.hasScope(Scopes.WORKERS_WRITE)
+    /** Workers Issues 汇总（workers-observability.read）。缺权限时不显示入口计数。 */
+    val canViewIssues: Boolean = authRepository.hasScope(Scopes.WORKERS_OBSERVABILITY_READ)
+
+    /** 预览列表（beta）；失败或为空时整段隐藏。 */
+    private val _previews = MutableStateFlow<List<WorkerPreview>>(emptyList())
+    val previews: StateFlow<List<WorkerPreview>> = _previews.asStateFlow()
+
+    /** 该 Worker 的活跃问题数；未加载 / 失败为 null（入口照常显示，只是不带数字）。 */
+    private val _activeIssues = MutableStateFlow<Long?>(null)
+    val activeIssues: StateFlow<Long?> = _activeIssues.asStateFlow()
 
     private val _isDeleting = MutableStateFlow(false)
     val isDeleting: StateFlow<Boolean> = _isDeleting.asStateFlow()
@@ -92,6 +105,31 @@ class WorkerDetailViewModel @Inject constructor(
 
     init {
         if (accountId != null && canViewMetrics) loadMetrics()
+        if (accountId != null) loadPreviews()
+        if (accountId != null && canViewIssues) {
+            loadIssueSummary()
+            // 在问题详情里改了状态，返回时计数跟着更新
+            viewModelScope.launch { issuesRepository.changes.collect { loadIssueSummary() } }
+        }
+    }
+
+    /** 预览（beta）。失败按「没有预览」处理，不打扰用户。 */
+    private fun loadPreviews() {
+        if (accountId == null) return
+        viewModelScope.launch {
+            _previews.value = runCatching { workerRepository.previews(accountId, scriptName) }
+                .getOrElse { if (it is CancellationException) throw it; emptyList() }
+        }
+    }
+
+    /** 活跃问题数（summary?service=脚本名）。公开测试端点，失败静默。 */
+    fun loadIssueSummary() {
+        if (accountId == null || !canViewIssues) return
+        viewModelScope.launch {
+            val summary = runCatching { issuesRepository.summary(accountId, scriptName) }
+                .getOrElse { if (it is CancellationException) throw it; null }
+            _activeIssues.value = summary?.activeIssues
+        }
     }
 
     fun selectRange(range: AnalyticsTimeRange) {

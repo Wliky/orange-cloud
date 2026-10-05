@@ -1,0 +1,6 @@
+• KI-Crawler nach Art: Suche, Assistenten & Agenten und Training getrennt; robots.txt aus Präferenzen; Bot-Erkennung auf Sitzungsebene
+• Workers-Probleme: Fehler gebündelt, lösen oder ignorieren; Vorschau-URLs im Worker
+• Sicherheitseinblicke: Domain mit einem Tippen prüfen
+• Zugriffsdetails und Sicherheitsereignisse
+• Cache als veraltet markieren, Cache-Antwortregeln, Regeln vorab prüfen
+• R2 und KV in EU/USA, R2-Bandbreite, überschattete DNS-Einträge, Domainsuche

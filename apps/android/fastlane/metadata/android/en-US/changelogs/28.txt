@@ -1,0 +1,6 @@
+• AI crawlers by type: AI Search, Assistants & Agents and Training set separately; robots.txt from your preferences; session-level bot detection
+• Workers issues: errors grouped to resolve or ignore; preview URLs in Worker details
+• Security Insights: scan a domain in one tap
+• Traffic Breakdown and Security Events
+• Mark cache as stale; Cache Response Rules; validate rules before saving
+• EU/US R2 and KV, R2 bandwidth, shadowed DNS records, domain search

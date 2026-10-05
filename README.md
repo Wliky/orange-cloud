@@ -7,6 +7,7 @@
 **A native Cloudflare client for iPhone, iPad & Apple Watch — sign in with OAuth, no API tokens to paste.**
 
 <a href="https://apps.apple.com/app/id6779323783"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83" alt="Download Orange Cloud on the App Store" height="54" /></a>
+<a href="https://play.google.com/store/apps/details?id=jiamin.chen.orangecloud"><img src="apps/web/public/play/en.svg" alt="Get Orange Cloud on Google Play" height="54" /></a>
 
 <a href="https://apps.apple.com/app/id6779323783"><img src="https://o-c.do/api/ranks/badge" alt="Orange Cloud App Store rank" height="20" /></a>
 
@@ -54,7 +55,7 @@ This repository is licensed under **AGPL-3.0 + Commons Clause**. You're free to 
 orange-cloud/
 ├── apps/
 │   ├── ios/        # The iOS / iPadOS / watchOS app (Swift / SwiftUI, Xcode project)
-│   ├── android/    # The Android client (Kotlin / Jetpack Compose) — feature-complete, in closed testing
+│   ├── android/    # The Android client (Kotlin / Jetpack Compose) — feature-complete, on Google Play
 │   └── web/        # Landing page + OAuth callback relay (Next.js on Cloudflare Workers)
 ├── package.json    # pnpm workspaces root
 └── turbo.json
@@ -71,7 +72,7 @@ A native **Kotlin + Jetpack Compose** client lives in [`apps/android/`](apps/and
 - **Security & Zero Trust** — WAF custom rules (create / toggle / delete), Domain Security, and Cloudflare Tunnel.
 - **Android touches** — Material You dynamic color over the daybreak theme, an adaptive two-pane layout for tablets and foldables, home-screen shortcuts, a Quick Settings tile, predictive back, and per-app language — localized in the same 13 languages.
 
-The open-source story matches iOS: the `oss` build flavor unlocks every Pro feature at no cost. You can download the direct APK or follow the project.
+The open-source story matches iOS: the `oss` build flavor unlocks every Pro feature at no cost. Get it on [Google Play](https://play.google.com/store/apps/details?id=jiamin.chen.orangecloud), or download the direct APK.
 
 ### Community
 
@@ -124,7 +125,7 @@ App 免费版支持单账号与完整的域名 / DNS 功能。在 App Store 官�
 orange-cloud/
 ├── apps/
 │   ├── ios/        # iOS / iPadOS / watchOS App（Swift / SwiftUI，Xcode 工程）
-│   ├── android/    # Android 客户端（Kotlin / Jetpack Compose）——功能完整，封测中
+│   ├── android/    # Android 客户端（Kotlin / Jetpack Compose）——功能完整，已上架 Google Play
 │   └── web/        # 落地页 + OAuth 回调中转（Next.js on Cloudflare Workers）
 ├── package.json    # pnpm workspaces 根
 └── turbo.json
@@ -141,7 +142,7 @@ orange-cloud/
 - **安全与 Zero Trust**——WAF 自定义规则（完整编辑器）、域名安全配置与 Cloudflare 隧道。
 - **Android 特色**——晨昏主题之上的 Material You 动态取色、平板与折叠屏自适应双栏、主屏长按快捷、快速设置磁贴、predictive back、每应用语言——同样本地化为 13 种语言。
 
-开源策略与 iOS 一致：`oss` 构建风味零成本解锁全部 Pro 功能。已提供直接下载的 APK（Direct Release）。
+开源策略与 iOS 一致：`oss` 构建风味零成本解锁全部 Pro 功能。可在 [Google Play](https://play.google.com/store/apps/details?id=jiamin.chen.orangecloud) 下载，也提供直接下载的 APK（Direct Release）。
 
 ### 社区
 

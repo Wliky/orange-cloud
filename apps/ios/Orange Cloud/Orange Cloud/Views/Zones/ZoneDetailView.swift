@@ -20,12 +20,16 @@ struct ZoneDetailView: View {
 
     // 分析区（内嵌第一层级，ViewModel 由本页持有，下拉刷新共用）
     @State private var analyticsViewModel: ZoneAnalyticsViewModel
+    // 访问明细 / 安全事件（adaptive 数据集，跟随分析区所选范围）
+    @State private var trafficDetailsViewModel: ZoneTrafficDetailsViewModel
 
     // 操作区
     @State private var actionsViewModel: ZoneActionsViewModel
     @State private var showPurgeConfirm = false
+    @State private var showInvalidateConfirm = false
     @State private var showPurgeSheet = false
     @State private var showPurgeDone = false
+    @State private var showInvalidateDone = false
     @State private var showActionDenied = false
     @State private var deniedScopeHint = ""
     /// 开关类操作先收口到这里，confirmationDialog 确认后才调 API
@@ -39,10 +43,14 @@ struct ZoneDetailView: View {
         _analyticsViewModel = State(initialValue: ZoneAnalyticsViewModel(
             analyticsService: session.analyticsService, zoneId: zoneId
         ))
+        _trafficDetailsViewModel = State(initialValue: ZoneTrafficDetailsViewModel(
+            service: session.zoneAdaptiveAnalyticsService, zoneId: zoneId
+        ))
         _actionsViewModel = State(initialValue: ZoneActionsViewModel(
             service: session.zoneSettingsService,
             zoneService: session.zoneService,
             botService: session.botManagementService,
+            precursorService: session.precursorService,
             zoneId: zoneId,
             paused: zone.paused
         ))
@@ -59,6 +67,8 @@ struct ZoneDetailView: View {
     private var canEditSettings: Bool { auth.hasScope("zone-settings.write") }
     private var canReadBots: Bool { auth.hasScope("bot-management.read") }
     private var canEditBots: Bool { auth.hasScope("bot-management.write") }
+    private var canReadPrecursor: Bool { auth.hasScope("precursor.read") }
+    private var canEditPrecursor: Bool { auth.hasScope("precursor.write") }
     private var canPurge: Bool { auth.hasScope("cache.purge") }
     /// 暂停 / 恢复走 zone 本身，权限与 zone-settings 那条链路无关
     private var canEditZone: Bool { auth.hasScope("zone.write") }
@@ -97,6 +107,12 @@ struct ZoneDetailView: View {
                         .padding(.horizontal, 4)
                     if auth.hasScope("analytics.read") {
                         ZoneAnalyticsSection(viewModel: analyticsViewModel)
+                        // 上方图表保持原数据集；明细与安全事件走 adaptive 数据集，范围跟随上方选择器
+                        ZoneTrafficDetailsSection(
+                            viewModel: trafficDetailsViewModel,
+                            range: analyticsViewModel.selectedRange
+                        )
+                        .padding(.top, 6)   // 与分析区内部卡片间距（14）对齐
                     } else {
                         Label("需要「流量分析」权限才能展示流量图表", systemImage: "lock")
                             .font(.footnote)
@@ -215,6 +231,18 @@ struct ZoneDetailView: View {
                         ZoneAccessRulesView(zoneId: zone.id, session: session)
                     }
 
+                    // 安全洞察（Security Center Insights）：全套餐免费，读写同 zone-settings.*；
+                    // 目的页是叶子（处理链接外跳浏览器，不再 push），eager 门控行即可
+                    PermissionGatedNavigationLink(
+                        label: String(localized: "安全洞察"),
+                        systemImage: "exclamationmark.shield",
+                        requiredScope: "zone-settings.read",
+                        tint: .red,
+                        showsChevron: true
+                    ) {
+                        SecurityInsightsView(zoneId: zone.id, zoneName: zone.name, session: session)
+                    }
+
                     // 与负载均衡的监控器不同源：这里监控单个源站，单源站也能用
                     PermissionGatedValueLink(
                         label: String(localized: "健康检查"),
@@ -238,24 +266,33 @@ struct ZoneDetailView: View {
 
                 // 整卡仅在读到任一组配置时出现：
                 // 机器人管控全套餐可用但需 bot-management.read；
-                // 上面两个 zone setting 是 Pro/Business 起，免费套餐读取即失败。
+                // 两个 zone setting 是 Pro 起，免费套餐读得到但不可改（editable == false）。
                 // 与其给用户一排永远打不开的锁，不如不显示。
                 if actionsViewModel.botConfigLoaded || actionsViewModel.aiSettingsAvailable {
                     sectionCard(String(localized: "AI 内容控制")) {
                         if actionsViewModel.botConfigLoaded {
-                            settingPickerRow(
-                                title: String(localized: "AI 爬虫"),
-                                subtitle: String(localized: "抓取内容用于训练或问答的机器人"),
-                                icon: "ant",
-                                tint: .indigo,
-                                selection: actionsViewModel.aiBotsProtection,
-                                isBusy: actionsViewModel.isUpdatingBotConfig,
-                                canEdit: canEditBots,
-                                deniedScope: "bot-management.write",
-                                requestChange: { mode in
-                                    Task { await actionsViewModel.setAIBotsProtection(mode) }
-                                }
-                            )
+                            // 2026-09-15 起 ai_bots_protection 拆成三类：响应带任一新字段就换成三个选择行，
+                            // 否则保留旧的单选作回退
+                            if actionsViewModel.usesAICrawlerPolicies {
+                                aiCrawlerPolicyRows
+                            } else {
+                                settingPickerRow(
+                                    title: String(localized: "AI 爬虫"),
+                                    subtitle: String(localized: "抓取内容用于训练或问答的机器人"),
+                                    icon: "ant",
+                                    tint: .indigo,
+                                    options: AIBotsProtection.allCases,
+                                    selection: actionsViewModel.aiBotsProtection,
+                                    selectionLabel: actionsViewModel.aiBotsProtection.label,
+                                    optionLabel: \.label,
+                                    isBusy: actionsViewModel.isUpdatingBotConfig,
+                                    canEdit: canEditBots,
+                                    deniedScope: "bot-management.write",
+                                    requestChange: { mode in
+                                        Task { await actionsViewModel.setAIBotsProtection(mode) }
+                                    }
+                                )
+                            }
 
                             settingToggleRow(
                                 title: String(localized: "链接迷宫"),
@@ -287,20 +324,38 @@ struct ZoneDetailView: View {
                                 }
                             )
 
-                            settingToggleRow(
-                                title: String(localized: "托管 robots.txt"),
-                                subtitle: String(localized: "由 Cloudflare 维护，置于现有内容之前"),
-                                icon: "list.bullet.rectangle",
-                                tint: .teal,
-                                isOn: actionsViewModel.managedRobotsTxt,
-                                isBusy: actionsViewModel.isUpdatingBotConfig,
-                                canEdit: canEditBots,
-                                isLoaded: true,
-                                deniedScope: "bot-management.write",
-                                requestToggle: { on in
-                                    Task { await actionsViewModel.setManagedRobotsTxt(on) }
-                                }
-                            )
+                            // Bot Preference Sync 取代托管 robots.txt：响应带该字段才换，否则保留旧开关
+                            if let syncOn = actionsViewModel.botPreferenceSync {
+                                settingToggleRow(
+                                    title: String(localized: "按偏好生成 robots.txt"),
+                                    subtitle: String(localized: "根据以上三项，由 Cloudflare 生成 robots.txt 规则"),
+                                    icon: "list.bullet.rectangle",
+                                    tint: .teal,
+                                    isOn: syncOn,
+                                    isBusy: actionsViewModel.isUpdatingBotConfig,
+                                    canEdit: canEditBots,
+                                    isLoaded: true,
+                                    deniedScope: "bot-management.write",
+                                    requestToggle: { on in
+                                        Task { await actionsViewModel.setBotPreferenceSync(on) }
+                                    }
+                                )
+                            } else {
+                                settingToggleRow(
+                                    title: String(localized: "托管 robots.txt"),
+                                    subtitle: String(localized: "由 Cloudflare 维护，置于现有内容之前"),
+                                    icon: "list.bullet.rectangle",
+                                    tint: .teal,
+                                    isOn: actionsViewModel.managedRobotsTxt,
+                                    isBusy: actionsViewModel.isUpdatingBotConfig,
+                                    canEdit: canEditBots,
+                                    isLoaded: true,
+                                    deniedScope: "bot-management.write",
+                                    requestToggle: { on in
+                                        Task { await actionsViewModel.setManagedRobotsTxt(on) }
+                                    }
+                                )
+                            }
 
                             settingToggleRow(
                                 title: String(localized: "内容使用声明"),
@@ -318,7 +373,7 @@ struct ZoneDetailView: View {
                             )
                         }
 
-                        if actionsViewModel.aiSettingsAvailable {
+                        if actionsViewModel.aiTrainingRedirectAvailable {
                             settingToggleRow(
                                 title: String(localized: "AI 训练重定向"),
                                 subtitle: String(localized: "把用于模型训练的爬虫引走"),
@@ -333,7 +388,9 @@ struct ZoneDetailView: View {
                                     Task { await actionsViewModel.setAITrainingRedirect(on) }
                                 }
                             )
+                        }
 
+                        if actionsViewModel.markdownForAgentsAvailable {
                             settingToggleRow(
                                 title: String(localized: "面向 Agent 的 Markdown"),
                                 subtitle: String(localized: "按请求把页面转成 Markdown 返回"),
@@ -365,6 +422,8 @@ struct ZoneDetailView: View {
                         deniedScope: canReadSettings ? "zone-settings.write" : "zone-settings.read",
                         requestToggle: { on in pendingAction = .underAttack(on) }
                     )
+
+                    precursorRow
 
                     settingToggleRow(
                         title: String(localized: "开发模式"),
@@ -410,6 +469,29 @@ struct ZoneDetailView: View {
                             if actionsViewModel.isPurging {
                                 ProgressView()
                             } else if !canPurge {
+                                Image(systemName: "lock.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                    }
+                    .disabled(actionsViewModel.isPurging)
+
+                    // 标记过期（invalidate_cache，2026-09-28 GA）：与清除同权限（cache.purge）、同门槛（免费）
+                    Button {
+                        if canPurge {
+                            showInvalidateConfirm = true
+                        } else {
+                            deniedScopeHint = "cache.purge"
+                            showActionDenied = true
+                        }
+                    } label: {
+                        HStack(spacing: 12) {
+                            TintIcon(systemImage: "clock.arrow.circlepath", color: .ocOrange)
+                            Text("标记过期")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            if !canPurge {
                                 Image(systemName: "lock.fill")
                                     .font(.caption)
                                     .foregroundStyle(.tertiary)
@@ -485,6 +567,7 @@ struct ZoneDetailView: View {
         }
         .sensoryFeedback(.impact(weight: .light), trigger: zone.pinned)
         .sensoryFeedback(.success, trigger: actionsViewModel.didPurge)
+        .sensoryFeedback(.success, trigger: actionsViewModel.didInvalidate)
         .task {
             if canReadSettings {
                 await actionsViewModel.loadSettings()
@@ -492,6 +575,9 @@ struct ZoneDetailView: View {
             }
             if canReadBots {
                 await actionsViewModel.loadBotConfig()
+            }
+            if canReadPrecursor {
+                await actionsViewModel.loadPrecursor()
             }
         }
         .task {
@@ -511,6 +597,7 @@ struct ZoneDetailView: View {
         .refreshable {
             if auth.hasScope("analytics.read") {
                 await analyticsViewModel.refresh()
+                await trafficDetailsViewModel.refresh(range: analyticsViewModel.selectedRange)
             }
             if canReadSettings {
                 await actionsViewModel.loadSettings()
@@ -518,6 +605,9 @@ struct ZoneDetailView: View {
             }
             if canReadBots {
                 await actionsViewModel.loadBotConfig()
+            }
+            if canReadPrecursor {
+                await actionsViewModel.loadPrecursor()
             }
             await syncPausedFromAPI()
         }
@@ -557,18 +647,34 @@ struct ZoneDetailView: View {
         } message: {
             Text("边缘节点将在数秒内完成清理。")
         }
+        .confirmationDialog("标记过期", isPresented: $showInvalidateConfirm, titleVisibility: .visible) {
+            Button("标记过期") {
+                Task { await actionsViewModel.purgeCache(action: .invalidate) }
+            }
+        } message: {
+            Text(String(localized: "将把该域名的全部缓存标记为过期。") + "\n"
+                 + String(localized: "保留缓存但标记为过期，下次请求时向源站校验；内容没变（304）就继续用缓存。需要源站返回 ETag 或 Last-Modified。"))
+        }
+        .alert("已标记为过期", isPresented: $showInvalidateDone) {
+            Button("好", role: .cancel) {}
+        } message: {
+            Text("保留缓存但标记为过期，下次请求时向源站校验；内容没变（304）就继续用缓存。需要源站返回 ETag 或 Last-Modified。")
+        }
         .sheet(isPresented: $showPurgeSheet) {
-            PurgeCacheSheet(zoneName: zone.name) { mode, items in
+            PurgeCacheSheet(zoneName: zone.name) { mode, items, action in
                 switch mode {
-                case .url:    await actionsViewModel.purgeURLs(items)
-                case .prefix: await actionsViewModel.purgePrefixes(items)
-                case .host:   await actionsViewModel.purgeHosts(items)
-                case .tag:    await actionsViewModel.purgeTags(items)
+                case .url:    await actionsViewModel.purgeURLs(items, action: action)
+                case .prefix: await actionsViewModel.purgePrefixes(items, action: action)
+                case .host:   await actionsViewModel.purgeHosts(items, action: action)
+                case .tag:    await actionsViewModel.purgeTags(items, action: action)
                 }
             }
         }
         .onChange(of: actionsViewModel.didPurge) {
             showPurgeDone = true
+        }
+        .onChange(of: actionsViewModel.didInvalidate) {
+            showInvalidateDone = true
         }
         .alert("权限不足", isPresented: $showActionDenied) {
             if let sessionId = auth.currentSessionId, !deniedScopeHint.isEmpty {
@@ -585,6 +691,7 @@ struct ZoneDetailView: View {
             get: { actionsViewModel.error != nil },
             set: { if !$0 { actionsViewModel.error = nil } }
         )) {
+            apiErrorDocButton(for: actionsViewModel.error)
             Button("好", role: .cancel) {}
         } message: {
             Text(actionsViewModel.error ?? "")
@@ -607,20 +714,119 @@ struct ZoneDetailView: View {
 
     // MARK: - 设置开关行
 
+    /// 会话级机器人检测（Precursor）：缺读权限显示锁定行（点按走一键重授权）；
+    /// 有权限但读取失败（字段已 deprecated、该 zone 无此能力）整行隐藏。
+    @ViewBuilder
+    private var precursorRow: some View {
+        if !canReadPrecursor {
+            settingPickerRow(
+                title: String(localized: "会话级机器人检测"),
+                subtitle: String(localized: "在整个会话中持续评估访客行为（Precursor）"),
+                icon: "person.badge.clock",
+                tint: .indigo,
+                options: PrecursorMode.allCases,
+                selection: nil,
+                selectionLabel: "",
+                optionLabel: \.label,
+                isBusy: false,
+                canEdit: false,
+                isLoaded: false,
+                deniedScope: "precursor.read",
+                requestChange: { _ in }
+            )
+        } else if let raw = actionsViewModel.precursorMode {
+            settingPickerRow(
+                title: String(localized: "会话级机器人检测"),
+                subtitle: String(localized: "在整个会话中持续评估访客行为（Precursor）"),
+                icon: "person.badge.clock",
+                tint: .indigo,
+                options: PrecursorMode.allCases,
+                selection: PrecursorMode(rawValue: raw),
+                selectionLabel: PrecursorMode.displayLabel(for: raw),
+                optionLabel: \.label,
+                isBusy: actionsViewModel.isUpdatingPrecursor,
+                canEdit: canEditPrecursor,
+                deniedScope: "precursor.write",
+                requestChange: { mode in
+                    Task { await actionsViewModel.setPrecursorMode(mode) }
+                }
+            )
+        }
+    }
+
+    /// 2026-09 拆分后的三项 AI 爬虫策略（搜索 / 助手与 Agent / 训练），共用同一个 PUT 端点与忙态
+    @ViewBuilder
+    private var aiCrawlerPolicyRows: some View {
+        aiCrawlerPolicyRow(
+            title: String(localized: "AI 搜索"),
+            subtitle: String(localized: "为回答问题而索引内容的爬虫"),
+            icon: "magnifyingglass",
+            raw: actionsViewModel.aiSearch,
+            options: AICrawlerPolicy.searchOptions
+        ) { policy in await actionsViewModel.setAISearch(policy) }
+
+        aiCrawlerPolicyRow(
+            title: String(localized: "AI 助手与 Agent"),
+            subtitle: String(localized: "代表用户实时抓取页面的机器人"),
+            icon: "person.crop.circle.badge.questionmark",
+            raw: actionsViewModel.aiUser,
+            options: AICrawlerPolicy.searchOptions
+        ) { policy in await actionsViewModel.setAIUser(policy) }
+
+        aiCrawlerPolicyRow(
+            title: String(localized: "AI 训练"),
+            subtitle: String(localized: "抓取内容用于训练或微调模型的爬虫"),
+            icon: "ant",
+            raw: actionsViewModel.aiTraining,
+            options: AICrawlerPolicy.trainingOptions
+        ) { policy in await actionsViewModel.setAITraining(policy) }
+    }
+
+    private func aiCrawlerPolicyRow(
+        title: String,
+        subtitle: String,
+        icon: String,
+        raw: String?,
+        options: [AICrawlerPolicy],
+        change: @escaping (AICrawlerPolicy) async -> Void
+    ) -> some View {
+        // 缺省视作「允许」打勾；未知档位不勾任何项，文案原样显示
+        let selection: AICrawlerPolicy? = if let raw { AICrawlerPolicy(rawValue: raw) } else { .disabled }
+        return settingPickerRow(
+            title: title,
+            subtitle: subtitle,
+            icon: icon,
+            tint: .indigo,
+            options: options,
+            selection: selection,
+            selectionLabel: AICrawlerPolicy.displayLabel(for: raw),
+            optionLabel: \.label,
+            isBusy: actionsViewModel.isUpdatingBotConfig,
+            canEdit: canEditBots,
+            deniedScope: "bot-management.write",
+            requestChange: { policy in Task { await change(policy) } }
+        )
+    }
+
     /// canEdit / isLoaded / deniedScope 由调用方给：Under Attack 与开发模式走
     /// zone-settings.*，暂停走 zone.write，两条权限链路不共用。
-    /// 三档选择行。与 settingToggleRow 同构，只是右侧从开关换成菜单；
+    /// 多档选择行。与 settingToggleRow 同构，只是右侧从开关换成菜单；
     /// 无写权限时显示当前档位并在点击时提示缺失 scope。
-    private func settingPickerRow(
+    /// selection 为 nil 表示当前值不在 options 里（未知档位），菜单不打勾、只显示 selectionLabel。
+    private func settingPickerRow<Option: Identifiable & Equatable>(
         title: String,
         subtitle: String,
         icon: String,
         tint: Color,
-        selection: AIBotsProtection,
+        options: [Option],
+        selection: Option?,
+        selectionLabel: String,
+        optionLabel: @escaping (Option) -> String,
         isBusy: Bool,
         canEdit: Bool,
+        isLoaded: Bool = true,
         deniedScope: String,
-        requestChange: @escaping (AIBotsProtection) -> Void
+        requestChange: @escaping (Option) -> Void
     ) -> some View {
         HStack(spacing: 12) {
             TintIcon(systemImage: icon, color: tint)
@@ -635,21 +841,22 @@ struct ZoneDetailView: View {
                 ProgressView()
             } else if canEdit {
                 Menu {
-                    ForEach(AIBotsProtection.allCases) { mode in
+                    ForEach(options) { option in
                         Button {
-                            requestChange(mode)
+                            requestChange(option)
                         } label: {
-                            if mode == selection {
-                                Label(mode.label, systemImage: "checkmark")
+                            if option == selection {
+                                Label(optionLabel(option), systemImage: "checkmark")
                             } else {
-                                Text(mode.label)
+                                Text(optionLabel(option))
                             }
                         }
                     }
                 } label: {
-                    Text(selection.label)
+                    Text(selectionLabel)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.trailing)
                 }
                 .accessibilityLabel(title)
             } else {
@@ -657,10 +864,20 @@ struct ZoneDetailView: View {
                     deniedScopeHint = deniedScope
                     showActionDenied = true
                 } label: {
-                    Text(selection.label)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    if isLoaded {
+                        Text(selectionLabel)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.trailing)
+                    } else {
+                        // 缺读权限：只显示锁，点按提示补授权
+                        Image(systemName: "lock.fill")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
+                    }
                 }
+                .accessibilityLabel(title)
             }
         }
     }

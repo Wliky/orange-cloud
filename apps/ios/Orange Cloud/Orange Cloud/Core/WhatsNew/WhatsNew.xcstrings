@@ -2509,6 +2509,82 @@
         }
       }
     },
+    "Workers 问题一览": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workers issues at a glance"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workers 問題一覽"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workers 問題一覽"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workers の問題をひと目で"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Problemas de Workers de un vistazo"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workers 문제 한눈에 보기"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Problemas dos Workers em um só lugar"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Problemas dos Workers num só lugar"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workers-Probleme auf einen Blick"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les problèmes des Workers d’un coup d’œil"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مشكلات Workers في لمحة"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workers sorunları tek bakışta"
+          }
+        }
+      }
+    },
     "Zero Trust": {
       "localizations": {
         "en": {
@@ -2885,6 +2961,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "Her şeyi tek yerden arayın"
+          }
+        }
+      }
+    },
+    "一键扫描域名的安全隐患，按严重程度查看和处理。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan a domain for security issues in one tap, then review and dismiss them by severity."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一鍵掃描網域的安全隱患，依嚴重程度檢視與處理。"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一按即可掃描網域的安全隱患，按嚴重程度查看及處理。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ワンタップでドメインのセキュリティ上の問題をスキャンし、重大度別に確認・対応できます。"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analiza un dominio en busca de problemas de seguridad con un toque y revísalos según su gravedad."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "한 번의 탭으로 도메인의 보안 문제를 검사하고 심각도별로 확인하고 처리할 수 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verifique os problemas de segurança de um domínio com um toque e analise-os por gravidade."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analise um domínio em busca de problemas de segurança com um toque e reveja-os por gravidade."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prüfen Sie eine Domain mit einem Tippen auf Sicherheitsprobleme und bearbeiten Sie sie nach Schweregrad."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analysez un domaine en un geste pour repérer les failles de sécurité, puis traitez-les par gravité."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "افحص النطاق بحثًا عن مشكلات الأمان بلمسة واحدة، ثم راجعها وعالجها حسب درجة خطورتها."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir alan adını tek dokunuşla güvenlik sorunlarına karşı tarayın, sorunları önem derecesine göre inceleyin."
           }
         }
       }
@@ -3645,6 +3797,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "Girişsiz geliştirici araç kutusu"
+          }
+        }
+      }
+    },
+    "免费套餐不再显示开不了的 AI 内容开关；权限不足时可以直接查看所需权限；D1 超出免费额度时给出明确说明。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI content switches that can’t be turned on are hidden on the Free plan, permission errors link to the permissions you need, and D1 explains when the free daily limit is reached."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免費方案不再顯示無法開啟的 AI 內容開關；權限不足時可直接查看所需權限；D1 超出免費額度時會清楚說明。"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免費計劃不再顯示無法開啟的 AI 內容開關；權限不足時可直接查看所需權限；D1 超出免費額度時會清楚說明。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無料プランでは有効にできない AI コンテンツのスイッチを表示しなくなりました。権限が足りないときは必要な権限を確認でき、D1 の無料枠を超えたときははっきり説明します。"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el plan Free se ocultan los interruptores de contenido de IA que no se pueden activar, los errores de permisos enlazan a los permisos necesarios y D1 avisa cuando se alcanza el límite diario gratuito."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "무료 플랜에서는 켤 수 없는 AI 콘텐츠 스위치를 숨기고, 권한 오류에서 필요한 권한을 바로 확인할 수 있으며, D1 무료 한도에 도달하면 명확히 안내합니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No plano Free, os interruptores de conteúdo de IA que não podem ser ativados ficam ocultos, erros de permissão levam às permissões necessárias e o D1 avisa quando o limite diário gratuito é atingido."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No plano Free, os interruptores de conteúdo de IA que não podem ser ativados ficam ocultos, os erros de permissão levam às permissões necessárias e o D1 avisa quando o limite diário gratuito é atingido."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Free-Tarif werden KI-Inhaltsschalter ausgeblendet, die sich nicht aktivieren lassen, Berechtigungsfehler verlinken auf die nötigen Berechtigungen, und D1 erklärt, wenn das kostenlose Tageslimit erreicht ist."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avec l’offre Free, les interrupteurs de contenu IA impossibles à activer sont masqués, les erreurs d’autorisation renvoient vers les autorisations nécessaires et D1 indique clairement quand la limite quotidienne gratuite est atteinte."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تُخفى في الخطة المجانية مفاتيح محتوى الذكاء الاصطناعي التي لا يمكن تفعيلها، وتربط أخطاء الأذونات بالأذونات المطلوبة، ويوضح D1 متى يُبلَغ الحد اليومي المجاني."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ücretsiz planda açılamayan yapay zekâ içerik anahtarları gizleniyor, izin hataları gereken izinlere bağlantı veriyor ve D1 ücretsiz günlük sınıra ulaşıldığında bunu açıkça belirtiyor."
           }
         }
       }
@@ -5625,6 +5853,82 @@
         }
       }
     },
+    "存储、DNS 与域名": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage, DNS and domains"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儲存、DNS 與網域"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儲存、DNS 與域名"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ストレージ、DNS、ドメイン"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almacenamiento, DNS y dominios"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스토리지, DNS, 도메인"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armazenamento, DNS e domínios"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armazenamento, DNS e domínios"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speicher, DNS und Domains"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stockage, DNS et domaines"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التخزين وDNS والنطاقات"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depolama, DNS ve alan adları"
+          }
+        }
+      }
+    },
     "存储与流量单位在所有语言下统一显示为国际通用符号（KB / MB / GB），不再随语言翻译。": {
       "localizations": {
         "en": {
@@ -5697,6 +6001,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "Depolama ve trafik boyutları artık tüm dillerde evrensel birim simgeleriyle (KB / MB / GB) gösteriliyor."
+          }
+        }
+      }
+    },
+    "安全洞察": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Security Insights"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安全洞察"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安全洞察"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "セキュリティインサイト"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Información de seguridad"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "보안 인사이트"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insights de segurança"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informações de segurança"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherheitseinblicke"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyses de sécurité"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رؤى الأمان"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Güvenlik içgörüleri"
           }
         }
       }
@@ -7069,6 +7449,82 @@
         }
       }
     },
+    "支持欧盟、美国数据驻留的 R2 存储桶和 KV 命名空间，R2 可看上传与下载带宽；DNS 标出被 NS 委派遮蔽的记录；可以搜索新域名并查看价格。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "R2 buckets and KV namespaces with EU or US data residency are supported, and R2 shows upload and download bandwidth. DNS flags records shadowed by an NS delegation, and you can search for new domains with prices."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支援歐盟、美國資料駐留的 R2 儲存桶與 KV 命名空間，R2 可查看上傳與下載頻寬；DNS 標示被 NS 委派遮蔽的記錄；可搜尋新網域並查看價格。"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支援歐盟、美國數據駐留的 R2 儲存桶及 KV 命名空間，R2 可查看上載及下載頻寬；DNS 標示被 NS 委派遮蔽的記錄；可搜尋新域名並查看價格。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EU・米国のデータ所在地を指定した R2 バケットと KV 名前空間に対応し、R2 ではアップロードとダウンロードの帯域幅を確認できます。DNS は NS 委任でシャドウされたレコードを表示し、新しいドメインを価格付きで検索できます。"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compatibilidad con buckets de R2 y espacios de nombres de KV con residencia de datos en la UE o EE. UU.; R2 muestra el ancho de banda de subida y bajada. DNS marca los registros sombreados por una delegación NS, y puedes buscar dominios nuevos con precios."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EU·미국 데이터 저장 위치를 지정한 R2 버킷과 KV 네임스페이스를 지원하며, R2에서 업로드·다운로드 대역폭을 확인할 수 있습니다. DNS는 NS 위임으로 가려진 레코드를 표시하고, 새 도메인을 가격과 함께 검색할 수 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suporte a buckets R2 e namespaces KV com residência de dados na UE ou nos EUA; o R2 mostra a largura de banda de upload e download. O DNS sinaliza registros sombreados por uma delegação NS, e você pode buscar novos domínios com preços."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suporte para buckets R2 e namespaces KV com residência de dados na UE ou nos EUA; o R2 mostra a largura de banda de carregamento e transferência. O DNS assinala registos sombreados por uma delegação NS, e pode pesquisar novos domínios com preços."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "R2-Buckets und KV-Namespaces mit Datenresidenz in der EU oder den USA werden unterstützt, und R2 zeigt die Upload- und Download-Bandbreite. DNS markiert durch eine NS-Delegierung überschattete Einträge, und Sie können neue Domains mit Preisen suchen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prise en charge des buckets R2 et espaces de noms KV avec résidence des données dans l’UE ou aux États-Unis ; R2 affiche la bande passante d’envoi et de téléchargement. Le DNS signale les enregistrements masqués par une délégation NS, et vous pouvez rechercher de nouveaux domaines avec leurs prix."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دعم حاويات R2 ومساحات أسماء KV مع تخزين البيانات في الاتحاد الأوروبي أو الولايات المتحدة، ويعرض R2 عرض النطاق للرفع والتنزيل. ويُبرز DNS السجلات المحجوبة بتفويض NS، ويمكنك البحث عن نطاقات جديدة مع أسعارها."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AB veya ABD veri yerleşimli R2 kovaları ve KV ad alanları destekleniyor; R2 yükleme ve indirme bant genişliğini gösteriyor. DNS, bir NS yetkilendirmesiyle gölgelenen kayıtları işaretliyor; fiyatlarıyla birlikte yeni alan adları arayabilirsiniz."
+          }
+        }
+      }
+    },
     "数据单位显示": {
       "localizations": {
         "en": {
@@ -7521,6 +7977,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "İspanyolca, Korece ve Portekizce eklendi — artık dokuz dilde."
+          }
+        }
+      }
+    },
+    "新增访问明细（国家/地区、状态码、路径、主机名）与安全事件。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Traffic Breakdown by country or region, status code, path and hostname, plus Security Events."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增存取明細（國家/地區、狀態碼、路徑、主機名稱）與安全事件。"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增訪問明細（國家/地區、狀態碼、路徑、主機名稱）及安全事件。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "国・地域、ステータスコード、パス、ホスト名別のアクセス内訳と、セキュリティイベントを追加しました。"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuevo desglose del tráfico por país o región, código de estado, ruta y nombre de host, además de eventos de seguridad."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "국가/지역, 상태 코드, 경로, 호스트 이름별 접속 세부 정보와 보안 이벤트가 추가되었습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novos detalhes do tráfego por país ou região, código de status, caminho e nome do host, além de eventos de segurança."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novos detalhes do tráfego por país ou região, código de estado, caminho e nome do anfitrião, além de eventos de segurança."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Zugriffsdetails nach Land oder Region, Statuscode, Pfad und Hostname sowie Sicherheitsereignisse."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nouveau détail du trafic par pays ou région, code d’état, chemin et nom d’hôte, ainsi que les événements de sécurité."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تفاصيل زيارات جديدة حسب البلد أو المنطقة ورمز الحالة والمسار واسم المضيف، إلى جانب الأحداث الأمنية."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ülke veya bölge, durum kodu, yol ve ana bilgisayar adına göre yeni trafik dökümü ile güvenlik olayları eklendi."
           }
         }
       }
@@ -10941,6 +11473,158 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bir JSON nesnesi yapıştırarak değişken veya gizli anahtarları toplu yazın — Cloudflare'ın yeni toplu uç noktasıyla tek atomik çağrı, tek tek kaydetmek yok."
+          }
+        }
+      }
+    },
+    "缓存与规则": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache and rules"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快取與規則"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "緩存與規則"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャッシュとルール"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caché y reglas"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캐시와 규칙"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache e regras"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache e regras"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache und Regeln"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache et règles"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التخزين المؤقت والقواعد"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önbellek ve kurallar"
+          }
+        }
+      }
+    },
+    "缓存可以「标记过期」，交给源站校验后再更新；新增缓存响应规则；WAF 与缓存规则保存前可以先校验。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mark cached content as stale so it revalidates with your origin instead of being purged. Cache Response Rules are new, and WAF and cache rules can be validated before you save."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快取可「標記過期」，交由來源伺服器驗證後再更新；新增快取回應規則；WAF 與快取規則儲存前可先驗證。"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "緩存可「標記過期」，交由源站校驗後再更新；新增緩存回應規則；WAF 與緩存規則儲存前可先校驗。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャッシュを「期限切れにする」と、削除せずにオリジンで再検証してから更新します。キャッシュレスポンスルールを追加し、WAF とキャッシュルールは保存前に検証できます。"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marca el contenido en caché como obsoleto para que se revalide con tu origen en lugar de purgarse. Llegan las reglas de respuesta de caché, y las reglas de WAF y de caché se pueden validar antes de guardar."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "캐시를 만료로 표시하면 삭제하지 않고 원본 서버에서 재검증한 뒤 갱신합니다. 캐시 응답 규칙이 추가되었고, WAF와 캐시 규칙은 저장 전에 검증할 수 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marque o conteúdo em cache como expirado para que seja revalidado na origem em vez de apagado. Chegaram as regras de resposta de cache, e as regras de WAF e de cache podem ser validadas antes de salvar."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marque o conteúdo em cache como expirado para que seja revalidado na origem em vez de apagado. Chegam as regras de resposta da cache, e as regras de WAF e de cache podem ser validadas antes de guardar."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Markieren Sie Cache-Inhalte als veraltet, damit sie beim Ursprungsserver neu validiert statt gelöscht werden. Neu sind Cache-Antwortregeln, und WAF- sowie Cache-Regeln lassen sich vor dem Speichern prüfen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marquez le contenu en cache comme obsolète pour qu’il soit revalidé auprès de l’origine plutôt que purgé. Les règles de réponse du cache arrivent, et les règles WAF et de cache peuvent être validées avant l’enregistrement."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ضع علامة «منتهي الصلاحية» على المحتوى المخزَّن مؤقتًا ليُعاد التحقق منه لدى الخادم الأصلي بدل حذفه. وأُضيفت قواعد استجابة التخزين المؤقت، وصار بالإمكان التحقق من قواعد WAF والتخزين المؤقت قبل حفظها."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önbellekteki içeriği silmek yerine eskimiş olarak işaretleyin; kaynak sunucuda yeniden doğrulansın. Önbellek yanıt kuralları eklendi; WAF ve önbellek kuralları kaydetmeden önce doğrulanabilir."
           }
         }
       }

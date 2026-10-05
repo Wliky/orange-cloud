@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- ⚠️ 自动生成 —— 请勿手改。改 packages/changelog/android.json 后运行 `pnpm changelog:gen`。 -->
 <resources>
+    <string name="whatsnew_2_2_0_0_title">AI クローラーを種類別に管理</string>
+    <string name="whatsnew_2_2_0_0_detail">AI 検索、AI アシスタントとエージェント、AI トレーニングの 3 種類のクローラーを個別に設定でき、設定に基づいて robots.txt を自動生成できます。セッション単位のボット検出（Precursor）にも対応しました。</string>
+    <string name="whatsnew_2_2_0_1_title">Workers の問題をひと目で</string>
+    <string name="whatsnew_2_2_0_1_detail">Worker の未処理の例外、5xx 応答、エラーログを問題としてまとめ、解決済みにしたり無視したりできます。Worker の詳細ではプレビュー URL も確認できます。</string>
+    <string name="whatsnew_2_2_0_2_title">セキュリティインサイト</string>
+    <string name="whatsnew_2_2_0_2_detail">ワンタップでドメインのセキュリティ上の問題をスキャンし、重大度別に確認・対応できます。</string>
+    <string name="whatsnew_2_2_0_3_title">より詳しいトラフィック分析</string>
+    <string name="whatsnew_2_2_0_3_detail">国・地域、ステータスコード、パス、ホスト名別のアクセス内訳と、セキュリティイベントを追加しました。</string>
+    <string name="whatsnew_2_2_0_4_title">キャッシュとルール</string>
+    <string name="whatsnew_2_2_0_4_detail">キャッシュを「期限切れにする」と、削除せずにオリジンで再検証してから更新します。キャッシュレスポンスルールを追加し、WAF とキャッシュルールは保存前に検証できます。</string>
+    <string name="whatsnew_2_2_0_5_title">ストレージ、DNS、ドメイン</string>
+    <string name="whatsnew_2_2_0_5_detail">EU・米国のデータ所在地を指定した R2 バケットと KV 名前空間に対応し、R2 ではアップロードとダウンロードの帯域幅を確認できます。DNS は NS 委任でシャドウされたレコードを表示し、新しいドメインを価格付きで検索できます。</string>
+    <string name="whatsnew_2_2_0_6_title">安定性の向上</string>
+    <string name="whatsnew_2_2_0_6_detail">無料プランでは有効にできない AI コンテンツのスイッチを表示しなくなりました。権限が足りないときは必要な権限を確認でき、D1 の無料枠を超えたときははっきり説明します。DNS レコードの編集時にタイプを変更できなくなりました（Cloudflare が非対応になったため）。</string>
     <string name="whatsnew_2_1_2_0_title">トリガールールをアプリから管理</string>
     <string name="whatsnew_2_1_2_0_detail">Snippet のトリガールールはこれまで表示のみで、変更するには Web 側に戻る必要がありました。これからはアプリ内で追加・編集・有効/無効・削除ができ、並び順もそのまま保たれます。</string>
     <string name="whatsnew_2_1_0_0_title">Turnstile をポケットから管理</string>

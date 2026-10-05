@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- ⚠️ 自动生成 —— 请勿手改。改 packages/changelog/android.json 后运行 `pnpm changelog:gen`。 -->
 <resources>
+    <string name="whatsnew_2_2_0_0_title">AI 爬蟲分類管控</string>
+    <string name="whatsnew_2_2_0_0_detail">AI 搜尋、AI 助理與 Agent、AI 訓練三類爬蟲可分別設定攔截方式，還能依偏好自動產生 robots.txt；新增工作階段層級機器人偵測（Precursor）。</string>
+    <string name="whatsnew_2_2_0_1_title">Workers 問題一覽</string>
+    <string name="whatsnew_2_2_0_1_detail">自動彙整 Worker 的未捕捉例外、5xx 回應與錯誤日誌，可標記為已解決或忽略；Worker 詳情中也能看到預覽網址。</string>
+    <string name="whatsnew_2_2_0_2_title">安全洞察</string>
+    <string name="whatsnew_2_2_0_2_detail">一鍵掃描網域的安全隱患，依嚴重程度檢視與處理。</string>
+    <string name="whatsnew_2_2_0_3_title">更細的流量分析</string>
+    <string name="whatsnew_2_2_0_3_detail">新增存取明細（國家/地區、狀態碼、路徑、主機名稱）與安全事件。</string>
+    <string name="whatsnew_2_2_0_4_title">快取與規則</string>
+    <string name="whatsnew_2_2_0_4_detail">快取可「標記過期」，交由來源伺服器驗證後再更新；新增快取回應規則；WAF 與快取規則儲存前可先驗證。</string>
+    <string name="whatsnew_2_2_0_5_title">儲存、DNS 與網域</string>
+    <string name="whatsnew_2_2_0_5_detail">支援歐盟、美國資料駐留的 R2 儲存桶與 KV 命名空間，R2 可查看上傳與下載頻寬；DNS 標示被 NS 委派遮蔽的記錄；可搜尋新網域並查看價格。</string>
+    <string name="whatsnew_2_2_0_6_title">更穩定</string>
+    <string name="whatsnew_2_2_0_6_detail">免費方案不再顯示無法開啟的 AI 內容開關；權限不足時可直接查看所需權限；D1 超出免費額度時會清楚說明；編輯 DNS 記錄時不再能修改類型（Cloudflare 已不支援）。</string>
     <string name="whatsnew_2_1_2_0_title">觸發規則可以直接管理了</string>
     <string name="whatsnew_2_1_2_0_detail">Snippet 的觸發規則以前只能看，要改得回網頁端。現在可以直接新增、編輯、啟停和刪除，改動也會保住規則原本的順序。</string>
     <string name="whatsnew_2_1_0_0_title">隨手管理 Turnstile 人機驗證</string>

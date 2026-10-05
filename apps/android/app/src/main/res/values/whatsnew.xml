@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- ⚠️ 自动生成 —— 请勿手改。改 packages/changelog/android.json 后运行 `pnpm changelog:gen`。 -->
 <resources>
+    <string name="whatsnew_2_2_0_0_title">AI 爬虫分类管控</string>
+    <string name="whatsnew_2_2_0_0_detail">AI 搜索、AI 助手与 Agent、AI 训练三类爬虫可以分别设置拦截方式，还能按偏好自动生成 robots.txt；新增会话级机器人检测（Precursor）。</string>
+    <string name="whatsnew_2_2_0_1_title">Workers 问题一览</string>
+    <string name="whatsnew_2_2_0_1_detail">自动汇总 Worker 的未捕获异常、5xx 响应和错误日志，可以标记为已解决或忽略；Worker 详情里还能看到预览地址。</string>
+    <string name="whatsnew_2_2_0_2_title">安全洞察</string>
+    <string name="whatsnew_2_2_0_2_detail">一键扫描域名的安全隐患，按严重程度查看和处理。</string>
+    <string name="whatsnew_2_2_0_3_title">更细的流量分析</string>
+    <string name="whatsnew_2_2_0_3_detail">新增访问明细（国家/地区、状态码、路径、主机名）与安全事件。</string>
+    <string name="whatsnew_2_2_0_4_title">缓存与规则</string>
+    <string name="whatsnew_2_2_0_4_detail">缓存可以「标记过期」，交给源站校验后再更新；新增缓存响应规则；WAF 与缓存规则保存前可以先校验。</string>
+    <string name="whatsnew_2_2_0_5_title">存储、DNS 与域名</string>
+    <string name="whatsnew_2_2_0_5_detail">支持欧盟、美国数据驻留的 R2 存储桶和 KV 命名空间，R2 可看上传与下载带宽；DNS 标出被 NS 委派遮蔽的记录；可以搜索新域名并查看价格。</string>
+    <string name="whatsnew_2_2_0_6_title">更稳</string>
+    <string name="whatsnew_2_2_0_6_detail">免费套餐不再显示开不了的 AI 内容开关；权限不足时可以直接查看所需权限；D1 超出免费额度时给出明确说明；编辑 DNS 记录时不再能修改类型（Cloudflare 已不支持）。</string>
     <string name="whatsnew_2_1_2_0_title">触发规则可以直接管理了</string>
     <string name="whatsnew_2_1_2_0_detail">Snippet 的触发规则以前只能看，要改得回网页端。现在可以直接添加、编辑、启停和删除，改动也会保住规则原本的顺序。</string>
     <string name="whatsnew_2_1_0_0_title">随手管理 Turnstile 人机验证</string>

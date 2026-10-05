@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jiamin.chen.orangecloud.core.auth.AuthRepository
 import jiamin.chen.orangecloud.core.auth.Scopes
+import jiamin.chen.orangecloud.core.network.cfDocumentationUrl
 import jiamin.chen.orangecloud.data.model.BotManagementConfig
 import jiamin.chen.orangecloud.data.model.BotManagementUpdate
 import jiamin.chen.orangecloud.data.repository.AccountStore
@@ -25,7 +26,10 @@ import javax.inject.Inject
 
 sealed interface ZoneSettingsEvent {
     data object Purged : ZoneSettingsEvent
-    data class Error(val message: String?) : ZoneSettingsEvent
+    /** 缓存已标记为过期（invalidate_cache）。 */
+    data object Invalidated : ZoneSettingsEvent
+    /** documentationUrl：CF 403 附带的所需权限文档，界面据此给「查看所需权限」。 */
+    data class Error(val message: String?, val documentationUrl: String? = null) : ZoneSettingsEvent
 }
 
 data class ZoneSettingsUiState(
@@ -38,15 +42,30 @@ data class ZoneSettingsUiState(
     val aiTrainingRedirect: Boolean = false,
     /** 面向 Agent 的 Markdown（content_converter）。Pro/Business 起。 */
     val markdownForAgents: Boolean = false,
-    /** 两项中至少一项读到了，才认为该域名支持这组设置；否则整组隐藏。 */
-    val aiSettingsAvailable: Boolean = false,
+    /** 上面两项各自读到且可改才显示，否则隐藏对应开关。 */
+    val aiTrainingRedirectAvailable: Boolean = false,
+    val markdownForAgentsAvailable: Boolean = false,
     // 机器人管控（全套餐可用，但需 bot-management.read）
     val aiBotsProtection: String = "disabled",
     val crawlerProtection: Boolean = false,
     val contentBotsProtection: Boolean = false,
     val robotsLicense: Boolean = false,
     val managedRobotsTxt: Boolean = false,
+    // 2026-09-15 起 AI 爬虫拆成三类（AI 搜索 / AI 助手与 Agent / AI 训练）。
+    // 响应里出现任一新字段才显示三项选择，否则保留旧的「AI 爬虫」单项作兜底。
+    val aiSearch: String = "disabled",
+    val aiUser: String = "disabled",
+    val aiTraining: String = "disabled",
+    val hasAiPreferences: Boolean = false,
+    /** Bot Preference Sync：响应带此字段才用它替代「托管 robots.txt」开关。 */
+    val botPreferenceSync: Boolean = false,
+    val hasBotPreferenceSync: Boolean = false,
     val botConfigLoaded: Boolean = false,
+    /** Precursor 会话级机器人检测的模式；null = 未授权 / 读取失败 → 不显示选择器。 */
+    val precursorMode: String? = null,
+    /** 缺 precursor.read（新 scope，老授权没有）：显示「需重新授权」提示而不是选择器。 */
+    val precursorMissingScope: Boolean = false,
+    val canWritePrecursor: Boolean = false,
     val canWriteBots: Boolean = false,
     val isLoading: Boolean = false,
     val isPurging: Boolean = false,
@@ -56,13 +75,22 @@ data class ZoneSettingsUiState(
     val canPurge: Boolean = false,
     val canPause: Boolean = false,
 ) {
-    /** 把接口返回的机器人配置摊到界面状态上。未知取值按最保守的「放行 / 关闭」显示。 */
+    /**
+     * 把接口返回的机器人配置摊到界面状态上。未知取值按最保守的「放行 / 关闭」显示。
+     * 三类 AI 偏好与同步开关一旦出现就保持新版界面：写入回包若缺这些字段，沿用当前值而不是退回旧界面。
+     */
     fun applyBotConfig(cfg: BotManagementConfig) = copy(
         aiBotsProtection = cfg.aiBotsProtection ?: "disabled",
         crawlerProtection = cfg.crawlerProtection == "enabled",
         contentBotsProtection = cfg.contentBotsProtection == "block",
         robotsLicense = cfg.cfRobotsVariant == "policy_only",
         managedRobotsTxt = cfg.isRobotsTxtManaged == true,
+        aiSearch = cfg.aiSearch ?: aiSearch,
+        aiUser = cfg.aiUser ?: aiUser,
+        aiTraining = cfg.aiTraining ?: aiTraining,
+        hasAiPreferences = hasAiPreferences || cfg.hasAiPreferences,
+        botPreferenceSync = cfg.botPreferenceSyncEnabled ?: botPreferenceSync,
+        hasBotPreferenceSync = hasBotPreferenceSync || cfg.botPreferenceSyncEnabled != null,
         botConfigLoaded = true,
     )
 }
@@ -86,6 +114,10 @@ class ZoneSettingsViewModel @Inject constructor(
     private val canReadBots = authRepository.hasScope(Scopes.BOT_MANAGEMENT_READ)
     private val canWriteBots = authRepository.hasScope(Scopes.BOT_MANAGEMENT_WRITE)
 
+    // Precursor 是 2026 秋季新增 scope：老用户重新登录授权后才有
+    private val canReadPrecursor = authRepository.hasScope(Scopes.PRECURSOR_READ)
+    private val canWritePrecursor = authRepository.hasScope(Scopes.PRECURSOR_WRITE)
+
     // 暂停走域名本身（zone.read/.write），与 zone-settings.* 那条链路的权限无关：
     // 没有 zone-settings.read 时本页只剩这一个开关，也要照常可用
     private val canPause = authRepository.hasScope(Scopes.ZONE_WRITE)
@@ -99,6 +131,8 @@ class ZoneSettingsViewModel @Inject constructor(
             canPurge = canPurge,
             canPause = canPause,
             canWriteBots = canWriteBots,
+            precursorMissingScope = !canReadPrecursor,
+            canWritePrecursor = canWritePrecursor,
         ),
     )
     val uiState: StateFlow<ZoneSettingsUiState> = _uiState.asStateFlow()
@@ -109,6 +143,7 @@ class ZoneSettingsViewModel @Inject constructor(
     init {
         if (hasRead) load()
         if (canReadBots) loadBotConfig()
+        if (canReadPrecursor) loadPrecursor()
         // 暂停态读缓存（Room 单一可信源），再拉一次网络校准
         viewModelScope.launch {
             zoneRepository.observeZone(zoneId).filterNotNull().collect { zone ->
@@ -140,7 +175,7 @@ class ZoneSettingsViewModel @Inject constructor(
                 val zone = zoneRepository.setPaused(accountId, zoneId, on)
                 _uiState.update { it.copy(paused = zone.isPaused) }
             } catch (e: Exception) {
-                eventChannel.send(ZoneSettingsEvent.Error(e.message))
+                eventChannel.send(ZoneSettingsEvent.Error(e.message, e.cfDocumentationUrl))
             } finally {
                 _uiState.update { it.copy(isTogglingPause = false) }
             }
@@ -154,12 +189,14 @@ class ZoneSettingsViewModel @Inject constructor(
             try {
                 val dev = async { runCatching { repository.getSetting(zoneId, "development_mode") }.getOrNull() }
                 val sec = async { runCatching { repository.getSetting(zoneId, "security_level") }.getOrNull() }
-                // 免费套餐不支持这两项，读取会失败——读不到就整组隐藏，
-                // 而不是给用户两个永远打不开的开关。
-                val aiRedirect =
-                    async { runCatching { repository.getSetting(zoneId, "redirects_for_ai_training") }.getOrNull() }
-                val converter =
-                    async { runCatching { repository.getSetting(zoneId, "content_converter") }.getOrNull() }
+                // 这两项 Pro 起。免费套餐也读得到值，只是 editable=false、一写就 400——
+                // 读不到或不可改都隐藏对应开关，而不是给用户一个永远打不开的开关。
+                val aiRedirect = async {
+                    runCatching { repository.getSettingIfEditable(zoneId, "redirects_for_ai_training") }.getOrNull()
+                }
+                val converter = async {
+                    runCatching { repository.getSettingIfEditable(zoneId, "content_converter") }.getOrNull()
+                }
                 val aiRedirectValue = aiRedirect.await()
                 val converterValue = converter.await()
                 _uiState.update {
@@ -168,7 +205,8 @@ class ZoneSettingsViewModel @Inject constructor(
                         underAttack = sec.await() == "under_attack",
                         aiTrainingRedirect = aiRedirectValue == "on",
                         markdownForAgents = converterValue == "on",
-                        aiSettingsAvailable = aiRedirectValue != null || converterValue != null,
+                        aiTrainingRedirectAvailable = aiRedirectValue != null,
+                        markdownForAgentsAvailable = converterValue != null,
                     )
                 }
             } finally {
@@ -182,7 +220,7 @@ class ZoneSettingsViewModel @Inject constructor(
         _uiState.update { it.copy(developmentMode = on) }
         viewModelScope.launch {
             runCatching { repository.setSetting(zoneId, "development_mode", if (on) "on" else "off") }
-                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message)); load() }
+                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message, it.cfDocumentationUrl)); load() }
         }
     }
 
@@ -191,7 +229,7 @@ class ZoneSettingsViewModel @Inject constructor(
         _uiState.update { it.copy(underAttack = on) }
         viewModelScope.launch {
             runCatching { repository.setSetting(zoneId, "security_level", if (on) "under_attack" else "medium") }
-                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message)); load() }
+                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message, it.cfDocumentationUrl)); load() }
         }
     }
 
@@ -214,7 +252,7 @@ class ZoneSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repository.setBotManagement(zoneId, update) }
                 .onSuccess { cfg -> _uiState.update { it.applyBotConfig(cfg) } }
-                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message)); loadBotConfig() }
+                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message, it.cfDocumentationUrl)); loadBotConfig() }
         }
     }
 
@@ -245,12 +283,46 @@ class ZoneSettingsViewModel @Inject constructor(
             BotManagementUpdate(isRobotsTxtManaged = on),
         )
 
+    /** 读 Precursor 模式。GET 失败（套餐 / 区域未开放等）就整行隐藏，不报错。 */
+    fun loadPrecursor() {
+        if (!canReadPrecursor) return
+        viewModelScope.launch {
+            val mode = runCatching { repository.getPrecursor(zoneId).defaultMode }.getOrNull()
+            _uiState.update { it.copy(precursorMode = mode) }
+        }
+    }
+
+    /** 改 Precursor 模式：乐观更新，失败回读纠正。 */
+    fun setPrecursorMode(mode: String) {
+        if (!canWritePrecursor || _uiState.value.precursorMode == null) return
+        _uiState.update { it.copy(precursorMode = mode) }
+        viewModelScope.launch {
+            runCatching { repository.setPrecursorMode(zoneId, mode) }
+                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message, it.cfDocumentationUrl)); loadPrecursor() }
+        }
+    }
+
+    fun setAiSearch(mode: String) =
+        updateBotConfig({ copy(aiSearch = mode) }, BotManagementUpdate(aiSearch = mode))
+
+    fun setAiUser(mode: String) =
+        updateBotConfig({ copy(aiUser = mode) }, BotManagementUpdate(aiUser = mode))
+
+    fun setAiTraining(mode: String) =
+        updateBotConfig({ copy(aiTraining = mode) }, BotManagementUpdate(aiTraining = mode))
+
+    fun setBotPreferenceSync(on: Boolean) =
+        updateBotConfig(
+            { copy(botPreferenceSync = on) },
+            BotManagementUpdate(botPreferenceSyncEnabled = on),
+        )
+
     fun setAiTrainingRedirect(on: Boolean) {
         if (!canWrite) return
         _uiState.update { it.copy(aiTrainingRedirect = on) }
         viewModelScope.launch {
             runCatching { repository.setSetting(zoneId, "redirects_for_ai_training", if (on) "on" else "off") }
-                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message)); load() }
+                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message, it.cfDocumentationUrl)); load() }
         }
     }
 
@@ -259,7 +331,7 @@ class ZoneSettingsViewModel @Inject constructor(
         _uiState.update { it.copy(markdownForAgents = on) }
         viewModelScope.launch {
             runCatching { repository.setSetting(zoneId, "content_converter", if (on) "on" else "off") }
-                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message)); load() }
+                .onFailure { eventChannel.send(ZoneSettingsEvent.Error(it.message, it.cfDocumentationUrl)); load() }
         }
     }
 
@@ -271,7 +343,7 @@ class ZoneSettingsViewModel @Inject constructor(
                 repository.purgeAllCache(zoneId)
                 eventChannel.send(ZoneSettingsEvent.Purged)
             } catch (e: Exception) {
-                eventChannel.send(ZoneSettingsEvent.Error(e.message))
+                eventChannel.send(ZoneSettingsEvent.Error(e.message, e.cfDocumentationUrl))
             } finally {
                 _uiState.update { it.copy(isPurging = false) }
             }
@@ -287,7 +359,39 @@ class ZoneSettingsViewModel @Inject constructor(
                 repository.purgeFiles(zoneId, urls.take(MAX_PURGE_URLS))
                 eventChannel.send(ZoneSettingsEvent.Purged)
             } catch (e: Exception) {
-                eventChannel.send(ZoneSettingsEvent.Error(e.message))
+                eventChannel.send(ZoneSettingsEvent.Error(e.message, e.cfDocumentationUrl))
+            } finally {
+                _uiState.update { it.copy(isPurging = false) }
+            }
+        }
+    }
+
+    /** 全部缓存标记过期（invalidate_cache，与全量清除同一权限 / 限流）。 */
+    fun invalidateCache() {
+        if (!canPurge) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isPurging = true) }
+            try {
+                repository.invalidateAllCache(zoneId)
+                eventChannel.send(ZoneSettingsEvent.Invalidated)
+            } catch (e: Exception) {
+                eventChannel.send(ZoneSettingsEvent.Error(e.message, e.cfDocumentationUrl))
+            } finally {
+                _uiState.update { it.copy(isPurging = false) }
+            }
+        }
+    }
+
+    /** 按 URL 标记过期。上限同按 URL 清缓存。 */
+    fun invalidateFiles(urls: List<String>) {
+        if (!canPurge || urls.isEmpty()) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isPurging = true) }
+            try {
+                repository.invalidateFiles(zoneId, urls.take(MAX_PURGE_URLS))
+                eventChannel.send(ZoneSettingsEvent.Invalidated)
+            } catch (e: Exception) {
+                eventChannel.send(ZoneSettingsEvent.Error(e.message, e.cfDocumentationUrl))
             } finally {
                 _uiState.update { it.copy(isPurging = false) }
             }

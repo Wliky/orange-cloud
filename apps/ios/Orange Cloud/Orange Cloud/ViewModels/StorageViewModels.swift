@@ -17,7 +17,10 @@ import UIKit
 final class R2BucketListViewModel {
 
     var buckets: [R2Bucket] = []
+    /// 按 GraphQL 桶名（R2Bucket.analyticsBucketName）索引的用量
     var usageByBucket: [String: R2BucketUsage] = [:]
+    /// 全账号近 30 天带宽（best-effort，账户级 GraphQL 不可用时为 nil，UI 隐藏）
+    var bandwidth: R2Bandwidth?
     var isLoading = false
     var error: String?
     var isCreating = false
@@ -60,9 +63,9 @@ final class R2BucketListViewModel {
         error = nil
         defer { isDeleting = false }
         do {
-            try await service.deleteBucket(accountId: accountId, name: bucket.name)
-            buckets.removeAll { $0.name == bucket.name }
-            usageByBucket[bucket.name] = nil
+            try await service.deleteBucket(accountId: accountId, name: bucket.name, jurisdiction: bucket.jurisdiction)
+            buckets.removeAll { $0.id == bucket.id }
+            usageByBucket[bucket.analyticsBucketName] = nil
             didDelete.toggle()
             return true
         } catch {
@@ -77,8 +80,11 @@ final class R2BucketListViewModel {
         do {
             buckets = try await service.listBuckets(accountId: accountId)
             isLoading = false
-            // 用量 best-effort：免费账号账户级 GraphQL 常被 authz 挡，失败不影响桶列表
-            usageByBucket = (try? await analyticsService.r2UsageByBucket(accountId: accountId)) ?? [:]
+            // 用量 / 带宽 best-effort：免费账号账户级 GraphQL 常被 authz 挡，失败不影响桶列表
+            async let usageTask = try? analyticsService.r2UsageByBucket(accountId: accountId)
+            async let bandwidthTask = try? analyticsService.r2Bandwidth(accountId: accountId)
+            usageByBucket = await usageTask ?? [:]
+            bandwidth = await bandwidthTask
         } catch {
             // 切分段 / 离开页面取消的请求不算失败（.task(id: kind) 切换会取消飞行中的列表请求）
             if !error.isCancellation { self.error = error.localizedDescription }
@@ -110,11 +116,14 @@ final class R2ObjectListViewModel {
     private let service: R2Service
     private let accountId: String
     let bucketName: String
+    /// 区域限制桶的辖区（每个桶级调用都要带 cf-r2-jurisdiction 头）；默认辖区为 nil
+    let jurisdiction: String?
 
-    init(service: R2Service, accountId: String, bucketName: String) {
+    init(service: R2Service, accountId: String, bucketName: String, jurisdiction: String?) {
         self.service = service
         self.accountId = accountId
         self.bucketName = bucketName
+        self.jurisdiction = jurisdiction
     }
 
     /// 每次整页加载（进文件夹 / 返回上级 / 刷新）递增；晚到的旧一代结果一律丢弃。
@@ -172,6 +181,7 @@ final class R2ObjectListViewModel {
         R2ObjectListOptions(
             accountId: accountId,
             bucketName: bucketName,
+            jurisdiction: jurisdiction,
             prefix: currentPrefix,
             cursor: cursor
         )
@@ -201,7 +211,7 @@ final class R2ObjectListViewModel {
         defer { isDownloading = false }
         do {
             let data = try await service.getObjectData(
-                accountId: accountId, bucketName: bucketName, key: object.key
+                accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction, key: object.key
             )
             var filename = (object.key as NSString).lastPathComponent
             if filename.isEmpty { filename = "file" }
@@ -227,7 +237,7 @@ final class R2ObjectListViewModel {
         defer { isUploading = false }
         do {
             try await service.putObject(
-                accountId: accountId, bucketName: bucketName,
+                accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction,
                 key: currentPrefix + filename, data: data, contentType: contentType
             )
             didUpload.toggle()
@@ -242,7 +252,7 @@ final class R2ObjectListViewModel {
     /// 删除成功后从列表移除
     func delete(key: String) async -> Bool {
         do {
-            try await service.deleteObject(accountId: accountId, bucketName: bucketName, key: key)
+            try await service.deleteObject(accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction, key: key)
             objects.removeAll { $0.key == key }
             return true
         } catch {
@@ -266,9 +276,9 @@ final class R2ObjectListViewModel {
     /// 复制对象到 destinationKey（同桶，可含 / 表示文件夹）
     func copyObject(_ object: R2Object, to destinationKey: String) async -> Bool {
         let contentType = object.httpMetadata?.contentType ?? "application/octet-stream"
-        return await runTransfer(object: object, label: String(localized: "复制中…")) { [service, accountId, bucketName] progress in
+        return await runTransfer(object: object, label: String(localized: "复制中…")) { [service, accountId, bucketName, jurisdiction] progress in
             try await service.copyObject(
-                accountId: accountId, bucketName: bucketName,
+                accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction,
                 sourceKey: object.key, destinationKey: destinationKey,
                 contentType: contentType, onProgress: progress
             )
@@ -278,9 +288,9 @@ final class R2ObjectListViewModel {
     /// 移动 / 重命名对象到 destinationKey（同桶）
     func moveObject(_ object: R2Object, to destinationKey: String) async -> Bool {
         let contentType = object.httpMetadata?.contentType ?? "application/octet-stream"
-        return await runTransfer(object: object, label: String(localized: "移动中…")) { [service, accountId, bucketName] progress in
+        return await runTransfer(object: object, label: String(localized: "移动中…")) { [service, accountId, bucketName, jurisdiction] progress in
             try await service.moveObject(
-                accountId: accountId, bucketName: bucketName,
+                accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction,
                 sourceKey: object.key, destinationKey: destinationKey,
                 contentType: contentType, onProgress: progress
             )
@@ -349,33 +359,48 @@ final class R2BucketSettingsViewModel {
     private let service: R2Service
     private let accountId: String
     let bucketName: String
+    /// 区域限制桶的辖区；默认辖区为 nil
+    let jurisdiction: String?
 
-    init(service: R2Service, accountId: String, bucketName: String) {
+    init(service: R2Service, accountId: String, bucketName: String, jurisdiction: String?) {
         self.service = service
         self.accountId = accountId
         self.bucketName = bucketName
+        self.jurisdiction = jurisdiction
     }
 
     func load() async {
         isLoading = true
         error = nil
         // 三块各自 best-effort：某块不可用（如桶从未设过 CORS 回 404）不连累其余
-        managedDomain = try? await service.managedDomain(accountId: accountId, bucketName: bucketName)
-        customDomains = (try? await service.customDomains(accountId: accountId, bucketName: bucketName)) ?? []
-        corsRules = ((try? await service.corsPolicy(accountId: accountId, bucketName: bucketName))?.rules) ?? []
+        managedDomain = try? await service.managedDomain(
+            accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction
+        )
+        customDomains = (try? await service.customDomains(
+            accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction
+        )) ?? []
+        corsRules = ((try? await service.corsPolicy(
+            accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction
+        ))?.rules) ?? []
         isLoading = false
     }
 
     func setManagedEnabled(_ enabled: Bool) async {
         await mutate {
-            try await service.setManagedDomainEnabled(accountId: accountId, bucketName: bucketName, enabled: enabled)
-            managedDomain = try? await service.managedDomain(accountId: accountId, bucketName: bucketName)
+            try await service.setManagedDomainEnabled(
+                accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction, enabled: enabled
+            )
+            managedDomain = try? await service.managedDomain(
+                accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction
+            )
         }
     }
 
     func removeCustomDomain(_ domain: String) async {
         await mutate {
-            try await service.removeCustomDomain(accountId: accountId, bucketName: bucketName, domain: domain)
+            try await service.removeCustomDomain(
+                accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction, domain: domain
+            )
             customDomains.removeAll { $0.domain == domain }
         }
     }
@@ -390,7 +415,10 @@ final class R2BucketSettingsViewModel {
         )
         await mutate {
             let next = corsRules + [rule]
-            try await service.putCorsPolicy(accountId: accountId, bucketName: bucketName, policy: R2CorsPolicy(rules: next))
+            try await service.putCorsPolicy(
+                accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction,
+                policy: R2CorsPolicy(rules: next)
+            )
             corsRules = next
         }
     }
@@ -401,9 +429,14 @@ final class R2BucketSettingsViewModel {
         next.remove(at: index)
         await mutate {
             if next.isEmpty {
-                try await service.deleteCorsPolicy(accountId: accountId, bucketName: bucketName)
+                try await service.deleteCorsPolicy(
+                    accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction
+                )
             } else {
-                try await service.putCorsPolicy(accountId: accountId, bucketName: bucketName, policy: R2CorsPolicy(rules: next))
+                try await service.putCorsPolicy(
+                    accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction,
+                    policy: R2CorsPolicy(rules: next)
+                )
             }
             corsRules = next
         }
@@ -411,7 +444,9 @@ final class R2BucketSettingsViewModel {
 
     func clearCors() async {
         await mutate {
-            try await service.deleteCorsPolicy(accountId: accountId, bucketName: bucketName)
+            try await service.deleteCorsPolicy(
+                accountId: accountId, bucketName: bucketName, jurisdiction: jurisdiction
+            )
             corsRules = []
         }
     }
@@ -464,7 +499,7 @@ final class D1DatabaseListViewModel {
             didCreate.toggle()
             return true
         } catch {
-            self.error = error.localizedDescription
+            self.error = D1FreeTierLimit.message(for: error)
             return false
         }
     }
@@ -481,7 +516,7 @@ final class D1DatabaseListViewModel {
             didDelete.toggle()
             return true
         } catch {
-            self.error = error.localizedDescription
+            self.error = D1FreeTierLimit.message(for: error)
             return false
         }
     }
@@ -587,7 +622,7 @@ final class D1QueryViewModel {
             }
             didRun.toggle()
         } catch {
-            self.error = error.localizedDescription
+            self.error = D1FreeTierLimit.message(for: error)
             results = []
             originalRowCounts = []
         }
@@ -615,7 +650,7 @@ final class D1QueryViewModel {
             tables.removeAll { $0 == name }
             return true
         } catch {
-            dropError = error.localizedDescription
+            dropError = D1FreeTierLimit.message(for: error)
             return false
         }
     }
@@ -778,7 +813,7 @@ final class D1TableViewModel {
             )
             return results.first?.results?.first ?? row
         } catch {
-            self.error = error.localizedDescription
+            self.error = D1FreeTierLimit.message(for: error)
             return nil
         }
     }
@@ -819,7 +854,7 @@ final class D1TableViewModel {
             await load()
             return true
         } catch {
-            self.error = error.localizedDescription
+            self.error = D1FreeTierLimit.message(for: error)
             return false
         }
     }
@@ -835,7 +870,7 @@ final class D1TableViewModel {
             await load()
             return true
         } catch {
-            self.error = error.localizedDescription
+            self.error = D1FreeTierLimit.message(for: error)
             return false
         }
     }
@@ -861,14 +896,16 @@ final class KVNamespaceListViewModel {
         self.service = service
     }
 
-    /// 创建命名空间：成功后插到列表顶端，返回 true。
-    func create(accountId: String, title: String) async -> Bool {
+    /// 创建命名空间：成功后插到列表顶端，返回 true。jurisdiction 为数据驻留（nil = 不限）。
+    func create(accountId: String, title: String, jurisdiction: String? = nil) async -> Bool {
         guard !isCreating else { return false }
         isCreating = true
         error = nil
         defer { isCreating = false }
         do {
-            let created = try await service.createNamespace(accountId: accountId, title: title)
+            let created = try await service.createNamespace(
+                accountId: accountId, title: title, jurisdiction: jurisdiction
+            )
             namespaces.insert(created, at: 0)
             didCreate.toggle()
             return true

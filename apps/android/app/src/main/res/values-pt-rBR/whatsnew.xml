@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- ⚠️ 自动生成 —— 请勿手改。改 packages/changelog/android.json 后运行 `pnpm changelog:gen`。 -->
 <resources>
+    <string name="whatsnew_2_2_0_0_title">Rastreadores de IA por tipo</string>
+    <string name="whatsnew_2_2_0_0_detail">Configure separadamente a busca com IA, os assistentes e agentes de IA e o treinamento de IA, e deixe a Cloudflare gerar o robots.txt pelas suas preferências. A detecção de bots por sessão (Precursor) também chegou.</string>
+    <string name="whatsnew_2_2_0_1_title">Problemas dos Workers em um só lugar</string>
+    <string name="whatsnew_2_2_0_1_detail">Exceções não tratadas, respostas 5xx e logs de erro dos seus Workers viram problemas que você pode marcar como resolvidos ou ignorar. Os detalhes do Worker também mostram as URLs de pré-visualização.</string>
+    <string name="whatsnew_2_2_0_2_title">Insights de segurança</string>
+    <string name="whatsnew_2_2_0_2_detail">Verifique os problemas de segurança de um domínio com um toque e analise-os por gravidade.</string>
+    <string name="whatsnew_2_2_0_3_title">Análise de tráfego mais detalhada</string>
+    <string name="whatsnew_2_2_0_3_detail">Novos detalhes do tráfego por país ou região, código de status, caminho e nome do host, além de eventos de segurança.</string>
+    <string name="whatsnew_2_2_0_4_title">Cache e regras</string>
+    <string name="whatsnew_2_2_0_4_detail">Marque o conteúdo em cache como expirado para que seja revalidado na origem em vez de apagado. Chegaram as regras de resposta de cache, e as regras de WAF e de cache podem ser validadas antes de salvar.</string>
+    <string name="whatsnew_2_2_0_5_title">Armazenamento, DNS e domínios</string>
+    <string name="whatsnew_2_2_0_5_detail">Suporte a buckets R2 e namespaces KV com residência de dados na UE ou nos EUA; o R2 mostra a largura de banda de upload e download. O DNS sinaliza registros sombreados por uma delegação NS, e você pode buscar novos domínios com preços.</string>
+    <string name="whatsnew_2_2_0_6_title">Mais estável</string>
+    <string name="whatsnew_2_2_0_6_detail">No plano Free, os interruptores de conteúdo de IA que não podem ser ativados ficam ocultos, erros de permissão levam às permissões necessárias e o D1 avisa quando o limite diário gratuito é atingido; ao editar um registro DNS não é mais possível mudar o tipo, algo que a Cloudflare deixou de permitir.</string>
     <string name="whatsnew_2_1_2_0_title">Agora você gerencia as regras de acionamento</string>
     <string name="whatsnew_2_1_2_0_detail">As regras de acionamento de um snippet eram somente leitura: qualquer mudança exigia voltar ao painel web. Agora dá para adicionar, editar, ativar e excluir por aqui, e cada alteração mantém a ordem original das regras.</string>
     <string name="whatsnew_2_1_0_0_title">Gerencie o Turnstile do bolso</string>

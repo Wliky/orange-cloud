@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- ⚠️ 自动生成 —— 请勿手改。改 packages/changelog/android.json 后运行 `pnpm changelog:gen`。 -->
 <resources>
+    <string name="whatsnew_2_2_0_0_title">KI-Crawler nach Art steuern</string>
+    <string name="whatsnew_2_2_0_0_detail">KI-Suche, KI-Assistenten &amp; Agenten sowie KI-Training lassen sich getrennt einstellen, und Cloudflare erzeugt die robots.txt aus Ihren Präferenzen. Neu ist außerdem die Bot-Erkennung auf Sitzungsebene (Precursor).</string>
+    <string name="whatsnew_2_2_0_1_title">Workers-Probleme auf einen Blick</string>
+    <string name="whatsnew_2_2_0_1_detail">Unbehandelte Ausnahmen, 5xx-Antworten und Fehlerlogs Ihrer Workers werden zu Problemen gebündelt, die Sie als gelöst markieren oder ignorieren können. Die Worker-Details zeigen jetzt auch die Vorschau-URLs.</string>
+    <string name="whatsnew_2_2_0_2_title">Sicherheitseinblicke</string>
+    <string name="whatsnew_2_2_0_2_detail">Prüfen Sie eine Domain mit einem Tippen auf Sicherheitsprobleme und bearbeiten Sie sie nach Schweregrad.</string>
+    <string name="whatsnew_2_2_0_3_title">Genauere Traffic-Analyse</string>
+    <string name="whatsnew_2_2_0_3_detail">Neue Zugriffsdetails nach Land oder Region, Statuscode, Pfad und Hostname sowie Sicherheitsereignisse.</string>
+    <string name="whatsnew_2_2_0_4_title">Cache und Regeln</string>
+    <string name="whatsnew_2_2_0_4_detail">Markieren Sie Cache-Inhalte als veraltet, damit sie beim Ursprungsserver neu validiert statt gelöscht werden. Neu sind Cache-Antwortregeln, und WAF- sowie Cache-Regeln lassen sich vor dem Speichern prüfen.</string>
+    <string name="whatsnew_2_2_0_5_title">Speicher, DNS und Domains</string>
+    <string name="whatsnew_2_2_0_5_detail">R2-Buckets und KV-Namespaces mit Datenresidenz in der EU oder den USA werden unterstützt, und R2 zeigt die Upload- und Download-Bandbreite. DNS markiert durch eine NS-Delegierung überschattete Einträge, und Sie können neue Domains mit Preisen suchen.</string>
+    <string name="whatsnew_2_2_0_6_title">Stabiler</string>
+    <string name="whatsnew_2_2_0_6_detail">Im Free-Tarif werden KI-Inhaltsschalter ausgeblendet, die sich nicht aktivieren lassen, Berechtigungsfehler verlinken auf die nötigen Berechtigungen, und D1 erklärt, wenn das kostenlose Tageslimit erreicht ist; beim Bearbeiten eines DNS-Eintrags lässt sich der Typ nicht mehr ändern, da Cloudflare das nicht mehr erlaubt.</string>
     <string name="whatsnew_2_1_2_0_title">Trigger-Regeln jetzt in der App verwalten</string>
     <string name="whatsnew_2_1_2_0_detail">Die Trigger-Regeln eines Snippets waren nur lesbar – jede Änderung erforderte den Umweg über das Web-Dashboard. Jetzt kannst du sie direkt hinzufügen, bearbeiten, aktivieren und löschen; die ursprüngliche Reihenfolge bleibt dabei erhalten.</string>
     <string name="whatsnew_2_1_0_0_title">Turnstile aus der Hosentasche verwalten</string>

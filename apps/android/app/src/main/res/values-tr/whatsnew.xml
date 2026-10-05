@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- ⚠️ 自动生成 —— 请勿手改。改 packages/changelog/android.json 后运行 `pnpm changelog:gen`。 -->
 <resources>
+    <string name="whatsnew_2_2_0_0_title">Yapay zekâ tarayıcıları türe göre</string>
+    <string name="whatsnew_2_2_0_0_detail">Yapay zekâ araması, yapay zekâ asistanları ve ajanlar ile yapay zekâ eğitimi tarayıcılarını ayrı ayrı ayarlayın; robots.txt tercihlerinize göre otomatik oluşturulsun. Oturum düzeyinde bot algılama (Precursor) da eklendi.</string>
+    <string name="whatsnew_2_2_0_1_title">Workers sorunları tek bakışta</string>
+    <string name="whatsnew_2_2_0_1_detail">Workers\'taki yakalanmamış istisnalar, 5xx yanıtları ve hata günlükleri çözüldü olarak işaretleyebileceğiniz ya da yok sayabileceğiniz sorunlar hâlinde toplanır. Worker ayrıntılarında önizleme adresleri de görünür.</string>
+    <string name="whatsnew_2_2_0_2_title">Güvenlik içgörüleri</string>
+    <string name="whatsnew_2_2_0_2_detail">Bir alan adını tek dokunuşla güvenlik sorunlarına karşı tarayın, sorunları önem derecesine göre inceleyin.</string>
+    <string name="whatsnew_2_2_0_3_title">Daha ayrıntılı trafik analizi</string>
+    <string name="whatsnew_2_2_0_3_detail">Ülke veya bölge, durum kodu, yol ve ana bilgisayar adına göre yeni trafik dökümü ile güvenlik olayları eklendi.</string>
+    <string name="whatsnew_2_2_0_4_title">Önbellek ve kurallar</string>
+    <string name="whatsnew_2_2_0_4_detail">Önbellekteki içeriği silmek yerine eskimiş olarak işaretleyin; kaynak sunucuda yeniden doğrulansın. Önbellek yanıt kuralları eklendi; WAF ve önbellek kuralları kaydetmeden önce doğrulanabilir.</string>
+    <string name="whatsnew_2_2_0_5_title">Depolama, DNS ve alan adları</string>
+    <string name="whatsnew_2_2_0_5_detail">AB veya ABD veri yerleşimli R2 kovaları ve KV ad alanları destekleniyor; R2 yükleme ve indirme bant genişliğini gösteriyor. DNS, bir NS yetkilendirmesiyle gölgelenen kayıtları işaretliyor; fiyatlarıyla birlikte yeni alan adları arayabilirsiniz.</string>
+    <string name="whatsnew_2_2_0_6_title">Daha sağlam</string>
+    <string name="whatsnew_2_2_0_6_detail">Ücretsiz planda açılamayan yapay zekâ içerik anahtarları gizleniyor, izin hataları gereken izinlere bağlantı veriyor ve D1 ücretsiz günlük sınıra ulaşıldığında bunu açıkça belirtiyor; DNS kaydı düzenlenirken türü artık değiştirilemiyor; Cloudflare buna artık izin vermiyor.</string>
     <string name="whatsnew_2_1_2_0_title">Tetikleme kuralları artık uygulamadan yönetiliyor</string>
     <string name="whatsnew_2_1_2_0_detail">Bir snippet’in tetikleme kuralları yalnızca görüntülenebiliyordu; her değişiklik için web paneline dönmek gerekiyordu. Artık buradan ekleyebilir, düzenleyebilir, açıp kapatabilir ve silebilirsiniz; kuralların özgün sırası da korunur.</string>
     <string name="whatsnew_2_1_0_0_title">Turnstile\'ı cebinizden yönetin</string>
