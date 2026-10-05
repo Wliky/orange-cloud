@@ -29,9 +29,8 @@ fun buildProp(key: String, default: String = ""): String =
 //
 //   direct → 官网直装包的【最终签名】。已对外分发，包名与签名永久绑死，**这一条永远不能换**。
 //            用个人主体那把（keystore.properties 指向 ~/keys/identities/personal/android/）。
-//   play   → Play 的【上传密钥】，随时可在 Play Console 申请重置。
-//            目前仍是同一把；等「重置上传密钥」批下来之后，把下面 productFlavors 里 play 那一行
-//            改成 signingConfigs.findByName("zhejia") 即可，用户完全无感（Play 分发用谷歌自己的密钥）。
+//   play   → Play 的【上传密钥】，已在 Play Console 重置为柘家统一发行密钥（SHA-1 B0:C4:18:52…，
+//            2026-10-05 在 Play 管理中心核对）。用户无感：Play 分发用谷歌自己的密钥。
 //
 // 口令文件都不入库；缺文件时 release 退化为未签名，保证全新 clone / CI 仍可构建。
 fun expandHome(path: String): File =
@@ -44,7 +43,7 @@ val keystoreProps = Properties().apply {
 }
 val hasReleaseKeystore = keystoreProps.getProperty("storeFile") != null
 
-/** 柘家科技统一发行密钥。Play 上传密钥重置批下来之后启用 */
+/** 柘家科技统一发行密钥：play 渠道的 Play 上传密钥 */
 val zhejiaProps: Properties? = run {
     val configured = (providers.gradleProperty("zhejiaSigningProperties").orNull
         ?: System.getenv("ZHEJIA_SIGNING_PROPERTIES")
@@ -66,8 +65,8 @@ android {
         // 实况通知促升(API36) 均 if-guard 渐进增强，Android 8–11 落固定品牌调色板与常驻通知回退。
         minSdk = 26
         targetSdk = 36
-        versionCode = 27
-        versionName = "2.1.3"
+        versionCode = 28
+        versionName = "2.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // OAuth 回调（Web 后端 302 跳回的自定义 scheme）
@@ -80,7 +79,8 @@ android {
         buildConfigField("String", "FCM_API_KEY", "\"${buildProp("FCM_API_KEY")}\"")
         buildConfigField("String", "FCM_SENDER_ID", "\"${buildProp("FCM_SENDER_ID")}\"")
 
-        // OAuth 回调地址：默认官方中转；oss 自编译者在 local.properties / -POAUTH_REDIRECT_URI 覆盖。
+        // 自编译定制：OAuth 回调地址默认走官方中转，oss 自编译者经 local.properties /
+        // -POAUTH_REDIRECT_URI 覆盖（CI 从仓库 Variables 注入），不写死在源码里。
         buildConfigField("String", "OAUTH_REDIRECT_URI", "\"${buildProp("OAUTH_REDIRECT_URI", "https://o-c.do/oauth/callback")}\"")
     }
 
@@ -147,8 +147,8 @@ android {
     // AGP 里 buildType 上的 signingConfig 优先级高于渠道，所以 buildTypes.release 不设。
     //
     // ⚠️ direct 是官网直装包的最终签名，**永远不要改**：换了签名老用户无法覆盖安装。
-    // play 是 Play 的上传密钥：等「重置上传密钥」批下来，把下面那一行换成 "zhejia" 即可。
-    productFlavors.getByName("play").signingConfig = signingConfigs.findByName("release")
+    // play 是 Play 的上传密钥，已重置为柘家那把；用个人那把签的 AAB 会被 Play 拒收。
+    productFlavors.getByName("play").signingConfig = signingConfigs.findByName("zhejia")
     productFlavors.getByName("oss").signingConfig = signingConfigs.findByName("release")
     productFlavors.getByName("direct").signingConfig = signingConfigs.findByName("release")
 

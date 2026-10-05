@@ -10,6 +10,43 @@ import Foundation
 
 nonisolated enum WhatsNewGenerated {
     static let releases: [WhatsNewRelease] = [
+        WhatsNewRelease(version: "2.2.0", items: [
+            WhatsNewItem(
+                icon:   "ant",
+                title:  String(localized: "AI 爬虫分类管控", table: "WhatsNew"),
+                detail: String(localized: "AI 搜索、AI 助手与 Agent、AI 训练三类爬虫可以分别设置拦截方式，还能按偏好自动生成 robots.txt；新增会话级机器人检测（Precursor）。", table: "WhatsNew")
+            ),
+            WhatsNewItem(
+                icon:   "exclamationmark.triangle",
+                title:  String(localized: "Workers 问题一览", table: "WhatsNew"),
+                detail: String(localized: "自动汇总 Worker 的未捕获异常、5xx 响应和错误日志，可以标记为已解决或忽略；Worker 详情里还能看到预览地址。", table: "WhatsNew")
+            ),
+            WhatsNewItem(
+                icon:   "checkmark.shield",
+                title:  String(localized: "安全洞察", table: "WhatsNew"),
+                detail: String(localized: "一键扫描域名的安全隐患，按严重程度查看和处理。", table: "WhatsNew")
+            ),
+            WhatsNewItem(
+                icon:   "chart.bar.xaxis",
+                title:  String(localized: "更细的流量分析", table: "WhatsNew"),
+                detail: String(localized: "新增访问明细（国家/地区、状态码、路径、主机名）与安全事件。", table: "WhatsNew")
+            ),
+            WhatsNewItem(
+                icon:   "arrow.clockwise",
+                title:  String(localized: "缓存与规则", table: "WhatsNew"),
+                detail: String(localized: "缓存可以「标记过期」，交给源站校验后再更新；新增缓存响应规则；WAF 与缓存规则保存前可以先校验。", table: "WhatsNew")
+            ),
+            WhatsNewItem(
+                icon:   "externaldrive",
+                title:  String(localized: "存储、DNS 与域名", table: "WhatsNew"),
+                detail: String(localized: "支持欧盟、美国数据驻留的 R2 存储桶和 KV 命名空间，R2 可看上传与下载带宽；DNS 标出被 NS 委派遮蔽的记录；可以搜索新域名并查看价格。", table: "WhatsNew")
+            ),
+            WhatsNewItem(
+                icon:   "wrench.and.screwdriver",
+                title:  String(localized: "更稳", table: "WhatsNew"),
+                detail: String(localized: "免费套餐不再显示开不了的 AI 内容开关；权限不足时可以直接查看所需权限；D1 超出免费额度时给出明确说明。", table: "WhatsNew")
+            )
+        ]),
         WhatsNewRelease(version: "2.1.3", items: [
             WhatsNewItem(
                 icon:   "rectangle.landscape.rotate",

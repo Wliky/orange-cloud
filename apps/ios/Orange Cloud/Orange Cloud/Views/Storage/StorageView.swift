@@ -390,6 +390,7 @@ private struct StorageContent: View {
         } actions: {
             Button("重试") { Task { await load() } }
                 .buttonStyle(.borderedProminent)
+            APIErrorDocLink(message: message)
         }
     }
 

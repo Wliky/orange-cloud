@@ -8,6 +8,7 @@ import { HdsNavDestination } from '@kit.UIDesignKit';
 //   ① Pro 闸门（requirePro）——管理与调试类能力属付费层，非 Pro 推付费墙
 //   ② scope 门控（workers-scripts.write）——写操作缺授权时拦截并提示重新授权
 import {
+  WorkerPreview,
   WorkerScript,
   WorkerScriptContent,
 } from '../../models/WorkerModels';
@@ -20,8 +21,9 @@ import {
   workerStatusColor,
   workerStatusLabel,
 } from '../../models/AnalyticsModels';
-import { NameParam, Routes } from '../../models/Routes';
+import { NameParam, Routes, WorkerIssuesParam } from '../../models/Routes';
 import { WorkerService } from '../../services/WorkerService';
+import { WorkerIssueSummary, WorkerIssuesService, issueNumber } from '../../services/WorkerIssuesService';
 import { AnalyticsService } from '../../services/AnalyticsService';
 import { AccountAnalyticsUnauthorizedError } from '../../services/UsageService';
 import { accountStore } from '../../core/store/AccountStore';
@@ -44,6 +46,7 @@ import { OCLayout, StatIsland, RevealBox } from '../common/Daybreak';
 import { MetricsChart, MetricsPoint } from '../common/MetricsChart';
 import { entitlement, EntitlementStore } from '../../core/purchase/EntitlementStore';
 import { requirePro } from '../paywall/ProGate';
+import { GlobalContext } from '../../core/system/GlobalContext';
 
 const METRIC_RANGES: AnalyticsRange[] = ['24h', '7d', '30d'];
 
@@ -105,14 +108,33 @@ class WorkerDetailVM {
   @Trace content: WorkerScriptContent | null = null;
   @Trace contentLoading: boolean = false;
   @Trace isDeployingCode: boolean = false;
+  /// 该 Worker 的活跃问题数（-1 = 未取到：非 Pro / 无权限 / 接口失败）
+  @Trace activeIssues: number = -1;
+  /// 预览（beta，只读）；出错或为空时整段隐藏
+  @Trace previews: WorkerPreview[] = [];
 
   private service: WorkerService = new WorkerService();
   private analytics: AnalyticsService = new AnalyticsService();
+  private issuesService: WorkerIssuesService = new WorkerIssuesService();
 
   async load(accountId: string, scriptName: string): Promise<void> {
     this.isLoading = true;
     try {
       this.loadMetrics(accountId, scriptName).catch(() => {
+      });
+      // 问题汇总按 service=脚本名过滤；Pro 能力，非 Pro 不发请求
+      if (entitlement.isPro && authManager.hasScope(Scopes.WORKERS_OBSERVABILITY_READ)) {
+        this.issuesService.summary(accountId, scriptName).then((summary: WorkerIssueSummary) => {
+          this.activeIssues = issueNumber(summary.activeIssues, -1);
+        }).catch(() => {
+          this.activeIssues = -1;
+        });
+      }
+      // 预览 best-effort：beta 接口，失败只是不显示
+      this.service.previews(accountId, scriptName).then((list: WorkerPreview[]) => {
+        this.previews = list;
+      }).catch(() => {
+        this.previews = [];
       });
       try {
         this.script = await this.service.findScript(accountId, scriptName);
@@ -223,6 +245,21 @@ class WorkerDetailVM {
       return (e as Error).message ?? '删除失败';
     }
   }
+}
+
+/// 预览的首个可打开 URL（没有补协议的补 https://）
+function previewUrl(preview: WorkerPreview): string {
+  const urls = preview.urls ?? [];
+  const first = urls.length > 0 ? urls[0] : '';
+  if (first === '' || first.startsWith('https://') || first.startsWith('http://')) {
+    return first;
+  }
+  return `https://${first}`;
+}
+
+/// 部署时间：deployed_on 缺省时退到 created_on
+function previewDate(preview: WorkerPreview): string {
+  return preview.deployed_on ?? preview.created_on ?? '';
 }
 
 /// 超过这个体积就不在手机上就地编辑（wrangler 打包产物动辄数百 KB 到数 MB），对齐 iOS
@@ -496,6 +533,65 @@ export struct WorkerDetailPage {
     .width('100%')
   }
 
+  /// 预览分组：名称 + 首个 URL（点按在浏览器打开）+ 部署时间
+  @Builder
+  previewsSection() {
+    Column({ space: 8 }) {
+      this.groupHeader('预览')
+      Column() {
+        ForEach(this.vm.previews, (preview: WorkerPreview, index: number) => {
+          Column({ space: 3 }) {
+            Text(preview.name ?? preview.slug ?? preview.id)
+              .fontSize(14)
+              .fontWeight(FontWeight.Medium)
+              .fontColor($r('sys.color.font_primary'))
+              .maxLines(1)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
+              .width('100%')
+            if (previewUrl(preview) !== '') {
+              Text(previewUrl(preview))
+                .fontSize(12)
+                .fontFamily('monospace')
+                .fontColor($r('app.color.oc_brand_text'))
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .width('100%')
+            }
+            if (previewDate(preview) !== '') {
+              Text(`部署于 ${formatDateTime(previewDate(preview))}`)
+                .fontSize(11)
+                .fontColor($r('sys.color.font_tertiary'))
+                .width('100%')
+            }
+          }
+          .width('100%')
+          .padding({ left: 14, right: 14, top: 10, bottom: 10 })
+          .onClick(() => {
+            const url = previewUrl(preview);
+            if (url !== '') {
+              try {
+                GlobalContext.get().openLink(url).catch(() => {
+                });
+              } catch (e) {
+              }
+            }
+          })
+          if (index < this.vm.previews.length - 1) {
+            Divider()
+              .strokeWidth(0.5)
+              .color($r('sys.color.comp_divider'))
+              .margin({ left: 14 })
+          }
+        }, (preview: WorkerPreview) => preview.id)
+      }
+      .width('100%')
+      .backgroundColor($r('sys.color.comp_background_list_card'))
+      .borderRadius(OCLayout.chipRadius)
+      .clip(true)
+    }
+    .width('100%')
+  }
+
   /// 时间窗分段（24h / 7d / 30d，对照 iOS 的 segmented Picker）
   @Builder
   rangePicker() {
@@ -668,7 +764,7 @@ export struct WorkerDetailPage {
     .width('100%')
   }
 
-  /// 调试分组：实时日志（tail）+ 历史日志（Observability）
+  /// 调试分组：实时日志（tail）+ 历史日志（Observability）+ 问题（Observability Issues）
   @Builder
   debugSection() {
     Column({ space: 8 }) {
@@ -706,6 +802,29 @@ export struct WorkerDetailPage {
             }
             const param: NameParam = { name: this.scriptName };
             this.pathStack?.pushPathByName(Routes.WORKER_LOGS, param);
+          },
+        })
+        Divider()
+          .color($r('sys.color.comp_divider'))
+          .margin({ left: 56 })
+        // 问题：Cloudflare 自动归类的异常 / 5xx / 错误日志，进入后只看本 Worker
+        NavRow({
+          symbol: $r('sys.symbol.exclamationmark_triangle'),
+          title: '问题',
+          subtitle: this.vm.activeIssues >= 0
+            ? `活跃问题 ${formatCount(this.vm.activeIssues)}`
+            : '未捕获异常、5xx 与错误日志（公开测试）',
+          locked: !this.entitlements.isPro,
+          onNav: () => {
+            if (!requirePro(this.pathStack, 'Workers 问题')) {
+              return;
+            }
+            if (!authManager.hasScope(Scopes.WORKERS_OBSERVABILITY_READ)) {
+              this.toast('当前授权未包含 Workers 可观测性读取权限（workers-observability.read），可在「设置 → 身份」中升级授权');
+              return;
+            }
+            const param: WorkerIssuesParam = { service: this.scriptName };
+            this.pathStack?.pushPathByName(Routes.WORKER_ISSUES, param);
           },
         })
       }
@@ -816,6 +935,9 @@ export struct WorkerDetailPage {
                   RevealBox({ idx: 1 }) {
                     this.infoSection()
                   }
+                }
+                if (this.vm.previews.length > 0) {
+                  this.previewsSection()
                 }
                 RevealBox({ idx: 2 }) {
                   this.metricsSection()

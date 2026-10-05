@@ -6,6 +6,46 @@ import { WhatsNewRelease } from './WhatsNew';
 export function whatsNewReleases(): WhatsNewRelease[] {
   return [
   {
+    version: '1.1.0',
+    items: [
+      {
+        symbol: $r('sys.symbol.wand_and_stars'),
+        title: 'AI 爬虫分类管控',
+        detail: 'AI 搜索、AI 助手与 Agent、AI 训练三类爬虫可以分别设置拦截方式，还能按偏好自动生成 robots.txt；新增会话级机器人检测（Precursor）。',
+      },
+      {
+        symbol: $r('sys.symbol.bell'),
+        title: 'Workers 问题一览',
+        detail: '自动汇总 Worker 的未捕获异常、5xx 响应和错误日志，可以标记为已解决或忽略；Worker 详情里还能看到预览地址。',
+      },
+      {
+        symbol: $r('sys.symbol.checkmark_shield'),
+        title: '安全洞察',
+        detail: '一键扫描域名的安全隐患，按严重程度查看和处理。',
+      },
+      {
+        symbol: $r('sys.symbol.magnifyingglass'),
+        title: '更细的流量分析',
+        detail: '新增访问明细（国家/地区、状态码、路径、主机名）与安全事件。',
+      },
+      {
+        symbol: $r('sys.symbol.square_stack_3d'),
+        title: '缓存与规则',
+        detail: '缓存可以「标记过期」，交给源站校验后再更新；新增缓存响应规则；WAF 与缓存规则保存前可以先校验。',
+      },
+      {
+        symbol: $r('sys.symbol.externaldrive'),
+        title: '存储、DNS 与域名',
+        detail: '支持欧盟、美国数据驻留的 R2 存储桶和 KV 命名空间，R2 可看上传与下载带宽；DNS 标出被 NS 委派遮蔽的记录；可以搜索新域名并查看价格。',
+      },
+      {
+        symbol: $r('sys.symbol.gearshape'),
+        title: '更稳',
+        detail: '免费套餐不再显示开不了的 AI 内容开关；权限不足时可以直接查看所需权限；D1 超出免费额度时给出明确说明；编辑 DNS 记录时不再能修改类型（Cloudflare 已不支持）。',
+      },
+    ],
+  },
+  {
     version: '1.0.0',
     items: [
       {

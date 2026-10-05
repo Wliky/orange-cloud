@@ -15,6 +15,7 @@ import { ZoneAnalyticsPage } from '../views/zones/ZoneAnalyticsPage';
 import { HealthCheckPage } from '../views/zones/HealthCheckPage';
 import { ZoneDnsSettingsPage } from '../views/zones/ZoneDnsSettingsPage';
 import { RegistrarPage } from '../views/account/RegistrarPage';
+import { DomainSearchPage } from '../views/account/DomainSearchPage';
 import { RequestTracerPage } from '../views/account/RequestTracerPage';
 import { WorkerBuildsPage } from '../views/workers/WorkerBuildsPage';
 import { ManagedHeadersPage } from '../views/zones/ManagedHeadersPage';
@@ -36,6 +37,8 @@ import { WorkerDetailPage } from '../views/workers/WorkerDetailPage';
 import { WorkerCreatePage } from '../views/workers/WorkerCreatePage';
 import { WorkerTailPage } from '../views/workers/WorkerTailPage';
 import { WorkerLogsPage } from '../views/workers/WorkerLogsPage';
+import { WorkerIssuesPage, WorkerIssueDetailPage } from '../views/workers/WorkerIssuesPage';
+import { SecurityInsightsPage } from '../views/zones/SecurityInsightsPage';
 import { WorkerBindingsPage } from '../views/workers/WorkerBindingsPage';
 import { WorkerTriggersPage } from '../views/workers/WorkerTriggersPage';
 import { WorkerDeploymentsPage } from '../views/workers/WorkerDeploymentsPage';
@@ -137,6 +140,8 @@ struct Index {
       ZoneDnsSettingsPage()
     } else if (name === Routes.REGISTRAR) {
       RegistrarPage()
+    } else if (name === Routes.DOMAIN_SEARCH) {
+      DomainSearchPage()
     } else if (name === Routes.REQUEST_TRACER) {
       RequestTracerPage()
     } else if (name === Routes.WORKER_BUILDS) {
@@ -179,6 +184,12 @@ struct Index {
       WorkerTailPage()
     } else if (name === Routes.WORKER_LOGS) {
       WorkerLogsPage()
+    } else if (name === Routes.WORKER_ISSUES) {
+      WorkerIssuesPage()
+    } else if (name === Routes.WORKER_ISSUE_DETAIL) {
+      WorkerIssueDetailPage()
+    } else if (name === Routes.SECURITY_INSIGHTS) {
+      SecurityInsightsPage()
     } else if (name === Routes.WORKER_SECRETS) {
       WorkerBindingsPage()
     } else if (name === Routes.WORKER_TRIGGERS) {

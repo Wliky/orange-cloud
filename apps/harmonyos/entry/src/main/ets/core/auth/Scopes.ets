@@ -42,6 +42,9 @@ export class Scopes {
   /// 机器人管控（GET/PUT /zones/{id}/bot_management）。全套餐可用，含免费版。
   static readonly BOT_MANAGEMENT_READ = 'bot-management.read';
   static readonly BOT_MANAGEMENT_WRITE = 'bot-management.write';
+  /// Precursor 会话级机器人检测（GET/PUT /zones/{id}/precursor）。全套餐可用。
+  static readonly PRECURSOR_READ = 'precursor.read';
+  static readonly PRECURSOR_WRITE = 'precursor.write';
   /// 独立健康检查（/zones/{id}/healthchecks）。免费版不可用。
   static readonly HEALTHCHECK_READ = 'healthcheck.read';
   static readonly HEALTHCHECK_WRITE = 'healthcheck.write';
@@ -108,6 +111,8 @@ export class Scopes {
   static readonly HYPERDRIVE_READ = 'query-cache.read';
   static readonly HYPERDRIVE_WRITE = 'query-cache.write';
   static readonly WORKERS_OBSERVABILITY_READ = 'workers-observability.read';
+  /// Workers 问题（Issues）改状态：标记已解决 / 忽略 / 重新打开（PATCH …/observability/issues/{id}）
+  static readonly WORKERS_OBSERVABILITY_WRITE = 'workers-observability.write';
   static readonly SINGLE_REDIRECT_READ = 'dynamic-redirect.read';
   static readonly SINGLE_REDIRECT_WRITE = 'dynamic-redirect.write';
   static readonly ORIGIN_RULES_READ = 'origin.read';
@@ -145,6 +150,7 @@ export class Scopes {
     Scopes.TUNNEL_READ, Scopes.TUNNEL_WRITE,
     Scopes.WAF_READ, Scopes.WAF_WRITE,
     Scopes.BOT_MANAGEMENT_READ, Scopes.BOT_MANAGEMENT_WRITE,
+    Scopes.PRECURSOR_READ, Scopes.PRECURSOR_WRITE,
     Scopes.HEALTHCHECK_READ, Scopes.HEALTHCHECK_WRITE,
     Scopes.ZONE_DNS_SETTINGS_READ, Scopes.ZONE_DNS_SETTINGS_WRITE,
     Scopes.REGISTRAR_READ, Scopes.REGISTRAR_ADMIN,
@@ -173,7 +179,7 @@ export class Scopes {
     Scopes.AIG_READ, Scopes.AIG_WRITE,
     Scopes.QUEUES_READ, Scopes.QUEUES_WRITE,
     Scopes.HYPERDRIVE_READ, Scopes.HYPERDRIVE_WRITE,
-    Scopes.WORKERS_OBSERVABILITY_READ,
+    Scopes.WORKERS_OBSERVABILITY_READ, Scopes.WORKERS_OBSERVABILITY_WRITE,
     Scopes.NOTIFICATIONS_READ, Scopes.NOTIFICATIONS_WRITE,
     Scopes.CHALLENGE_WIDGETS_READ, Scopes.CHALLENGE_WIDGETS_WRITE,
     Scopes.R2_CATALOG_SQL_READ,
@@ -184,6 +190,17 @@ export class Scopes {
     Scopes.CUSTOM_ERRORS_READ, Scopes.CUSTOM_ERRORS_WRITE,
     Scopes.PAGE_RULES_READ, Scopes.PAGE_RULES_WRITE,
     Scopes.OFFLINE_ACCESS,
+  ];
+
+  /// 上线后才新增的权限：老身份即便已授该模块也没有它们，身份详情的「补齐授权」据此补发
+  ///（已授该模块读 → 补新增读；已授该模块写 → 补新增写）。
+  /// 只列新增项、不做全量比对——CF 会静默丢弃个别 scope，全量比对会让升级提示永远消不掉。
+  static readonly addedReadScopes: string[] = [
+    Scopes.PRECURSOR_READ,
+  ];
+  static readonly addedWriteScopes: string[] = [
+    Scopes.WORKERS_OBSERVABILITY_WRITE,
+    Scopes.PRECURSOR_WRITE,
   ];
 
   /// 功能模块分组全集（覆盖 defaultScopes 除 offline_access 外的每一个 scope；
@@ -204,7 +221,9 @@ export class Scopes {
     {
       id: 'workers', title: 'Workers 脚本', desc: '查看和管理 Workers 与路由', icon: '⚡',
       readScopes: [Scopes.WORKERS_READ, Scopes.WORKERS_ROUTES_READ],
-      writeScopes: [Scopes.WORKERS_WRITE, Scopes.WORKERS_ROUTES_WRITE], required: false,
+      // 可观测性写权限随 Workers 读写一起申请：Workers 问题的「标记已解决 / 忽略」要用；
+      // 对应的读权限 workers-observability.read 在「流量分析」模块里（账号级用量也靠它）
+      writeScopes: [Scopes.WORKERS_WRITE, Scopes.WORKERS_ROUTES_WRITE, Scopes.WORKERS_OBSERVABILITY_WRITE], required: false,
     },
     {
       id: 'workers_tail', title: 'Workers 实时日志', desc: '查看 Workers 的实时执行日志', icon: '📜',
@@ -235,8 +254,9 @@ export class Scopes {
       readScopes: [Scopes.WAF_READ], writeScopes: [Scopes.WAF_WRITE], required: false,
     },
     {
-      id: 'bot_management', title: 'AI 与机器人', desc: '管控 AI 爬虫、内容机器人与 robots.txt', icon: '🐜',
-      readScopes: [Scopes.BOT_MANAGEMENT_READ], writeScopes: [Scopes.BOT_MANAGEMENT_WRITE], required: false,
+      id: 'bot_management', title: 'AI 与机器人', desc: '管控 AI 爬虫、内容机器人、robots.txt 与会话级机器人检测', icon: '🐜',
+      readScopes: [Scopes.BOT_MANAGEMENT_READ, Scopes.PRECURSOR_READ],
+      writeScopes: [Scopes.BOT_MANAGEMENT_WRITE, Scopes.PRECURSOR_WRITE], required: false,
     },
     {
       id: 'url_scanner', title: 'URL 扫描', desc: '提交链接做安全扫描并查看报告', icon: '🔍',

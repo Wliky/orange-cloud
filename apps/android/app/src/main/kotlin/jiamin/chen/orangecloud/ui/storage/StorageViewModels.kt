@@ -432,7 +432,7 @@ class R2ObjectListViewModel @Inject constructor(
                 _uiState.update { it.copy(hasError = true) }
                 return
             }
-            val page = storageRepository.listObjects(accountId, bucket, prefix, cursor)
+            val page = storageRepository.listObjects(accountId, bucket, prefix, cursor, jurisdiction)
             currentCoroutineContext().ensureActive()
             cursor = page.nextCursor
             val folders = R2Folder.makeList(page.folderPrefixes, prefix)

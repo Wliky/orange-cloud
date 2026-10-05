@@ -102,13 +102,21 @@ fun WafRulesScreen(
     val savedMsg = stringResource(R.string.waf_saved)
     val deletedMsg = stringResource(R.string.waf_deleted)
     val genericErrorMsg = stringResource(R.string.error_generic)
+    val context = LocalContext.current
+
+    // 打开 / 关闭编辑器都清掉上一次的校验结果
+    LaunchedEffect(showForm, editingRule) { viewModel.clearValidation() }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 WafEvent.Saved -> { showForm = false; editingRule = null; snackbarHostState.showSnackbar(savedMsg) }
                 WafEvent.Deleted -> snackbarHostState.showSnackbar(deletedMsg)
-                is WafEvent.Error -> snackbarHostState.showSnackbar(event.message?.takeIf { it.isNotBlank() } ?: genericErrorMsg)
+                is WafEvent.Error -> snackbarHostState.showApiError(
+                    context,
+                    event.message?.takeIf { it.isNotBlank() } ?: genericErrorMsg,
+                    event.documentationUrl,
+                )
             }
         }
     }

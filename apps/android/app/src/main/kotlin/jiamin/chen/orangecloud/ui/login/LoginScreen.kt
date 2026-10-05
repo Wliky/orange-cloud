@@ -73,9 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import jiamin.chen.orangecloud.BuildConfig
 import jiamin.chen.orangecloud.R
-import jiamin.chen.orangecloud.core.auth.OAuthConfig
 import jiamin.chen.orangecloud.core.auth.PermissionCatalog
 import jiamin.chen.orangecloud.core.auth.PermissionFeature
 import jiamin.chen.orangecloud.core.design.SkyBackground
@@ -156,16 +154,6 @@ private fun BrandView(error: String?, onSignIn: () -> Unit, onOpenToolbox: () ->
                 if (error != null) {
                     Spacer(Modifier.height(14.dp))
                     Text(stringResource(R.string.login_failed), color = cs.error, fontSize = 14.sp)
-                    // 自编译（oss）排障用：把 OAuth 实际注入值与原始失败原因一并显示，
-                    // 便于自建 Client / 回调中转时定位（play 官方包只显示上面的通用文案）。
-                    if (BuildConfig.IS_OSS) {
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            text = "reason: $error\nredirect: ${OAuthConfig.REDIRECT_URI}\nclient_id: ${OAuthConfig.clientId}",
-                            color = cs.error.copy(alpha = 0.85f),
-                            fontSize = 11.sp,
-                        )
-                    }
                 }
             }
         }

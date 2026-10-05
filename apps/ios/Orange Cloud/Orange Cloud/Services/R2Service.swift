@@ -16,9 +16,31 @@ struct R2Service {
         self.client = client
     }
 
+    /// 额外探测的区域限制辖区。不带头的列表是否包含区域限制桶没有定论，
+    /// 所以再分别带 eu / us 头各列一次（失败忽略），合并后按 (桶名, 辖区) 去重。
+    /// FedRAMP 只对政府账号开放，不做探测（不带头的列表若带出了也照常保留）。
+    private static let probedJurisdictions = ["eu", "us"]
+
     /// Bucket 列表（result 是 { buckets: [...] } 包装）。端点是游标分页：以前只取一页 100 个，
     /// 桶多的账号后面的桶在 App / Files.app 里根本不可达。
+    /// 默认列表失败才抛错；辖区探测失败（无该辖区 / 权限不符）静默忽略。
     func listBuckets(accountId: String) async throws -> [R2Bucket] {
+        async let euTask = try? listBucketPages(accountId: accountId, jurisdiction: "eu")
+        async let usTask = try? listBucketPages(accountId: accountId, jurisdiction: "us")
+        let base = try await listBucketPages(accountId: accountId, jurisdiction: nil)
+        let probed = [await euTask, await usTask]
+
+        var seen = Set<String>()
+        var merged: [R2Bucket] = []
+        for bucket in base + probed.compactMap(\.self).flatMap(\.self) {
+            // id = 默认辖区桶名 / 「辖区/桶名」，即按 (桶名, 辖区) 去重
+            if seen.insert(bucket.id).inserted { merged.append(bucket) }
+        }
+        return merged
+    }
+
+    /// 某个辖区的全部桶（游标翻页）。jurisdiction 为 nil = 不带头的默认列表。
+    private func listBucketPages(accountId: String, jurisdiction: String?) async throws -> [R2Bucket] {
         var all: [R2Bucket] = []
         var cursor: String?
         for _ in 0..<20 {
@@ -28,12 +50,14 @@ struct R2Service {
             }
             let response: CFAPIResponse<R2BucketList> = try await client.get(
                 "accounts/\(accountId)/r2/buckets",
-                queryItems: items
+                queryItems: items,
+                headers: R2Bucket.headers(jurisdiction: jurisdiction)
             )
             guard response.success, let list = response.result else {
                 throw response.toAPIError()
             }
-            all.append(contentsOf: list.buckets)
+            // 带辖区头列出来的桶若没回 jurisdiction 字段，按请求的辖区补上
+            all.append(contentsOf: jurisdiction.map { j in list.buckets.map { $0.assumingJurisdiction(j) } } ?? list.buckets)
             cursor = response.resultInfo?.cursor
             guard let cursor, !cursor.isEmpty, !list.buckets.isEmpty else { break }
         }

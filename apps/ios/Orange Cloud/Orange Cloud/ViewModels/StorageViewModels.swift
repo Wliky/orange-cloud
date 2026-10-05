@@ -547,7 +547,7 @@ final class D1DatabaseListViewModel {
                 databases = list.map { details[$0.uuid] ?? $0 }
             }
         } catch {
-            if !error.isCancellation { self.error = error.localizedDescription }
+            if !error.isCancellation { self.error = D1FreeTierLimit.message(for: error) }
             isLoading = false
         }
     }
@@ -730,7 +730,7 @@ final class D1TableViewModel {
             computeColumnWidths()
         } catch {
             guard generation == loadGeneration, !error.isCancellation else { return }
-            self.error = error.localizedDescription
+            self.error = D1FreeTierLimit.message(for: error)
         }
         if generation == loadGeneration { isLoading = false }
     }
@@ -747,7 +747,7 @@ final class D1TableViewModel {
             rows.append(contentsOf: next)
         } catch {
             guard generation == loadGeneration, !error.isCancellation else { return }
-            self.error = error.localizedDescription
+            self.error = D1FreeTierLimit.message(for: error)
         }
         if generation == loadGeneration { isLoading = false }
     }

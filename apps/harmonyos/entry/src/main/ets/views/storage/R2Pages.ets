@@ -3,8 +3,20 @@ import { systemMaterial, OC_TITLE_BAR_INSET } from '../common/Effects';
 import { ocSnack } from '../common/Snack';
 import { HdsNavDestination } from '@kit.UIDesignKit';
 // R2：存储桶列表 → 对象浏览（游标分页）+ 对象文本/文件上传 + 查看/详情/复制/移动/删除（对齐 Android R2Screens + iOS R2ObjectListView）。
-import { R2Bucket, R2Object, R2ObjectPage, R2PreviewKind, previewKindOf, mimeOf, extOf } from '../../models/StorageModels';
-import { Routes, NameParam, IdNameParam } from '../../models/Routes';
+// 区域限制桶（欧盟 / 美国 / FedRAMP）在列表上挂徽标，jurisdiction 随路由参数带进对象页与桶设置页，
+// 每个桶级请求都靠它加 cf-r2-jurisdiction 头。
+import {
+  R2Bucket,
+  R2Object,
+  R2ObjectPage,
+  R2PreviewKind,
+  previewKindOf,
+  mimeOf,
+  extOf,
+  r2JurisdictionHeader,
+  r2JurisdictionLabel,
+} from '../../models/StorageModels';
+import { Routes, R2BucketParam } from '../../models/Routes';
 import { StorageService, CursorPage } from '../../services/StorageService';
 import { accountStore } from '../../core/store/AccountStore';
 import { authManager } from '../../core/auth/AuthManager';
@@ -21,6 +33,7 @@ import { GlobalContext } from '../../core/system/GlobalContext';
 import { withDataTransfer } from '../../core/system/BackgroundTransfer';
 import { ocSheet } from '../common/Sheets';
 import { OCSkyBackground } from '../common/OCSky';
+import { R2BandwidthCard } from './R2Bandwidth';
 
 /// 复制/移动客户端内存保护上限：100MB（iOS 上限 300MB，移动端从紧——字节须整段过设备内存）
 const MAX_TRANSFER_BYTES = 100 * 1024 * 1024;
@@ -33,6 +46,11 @@ function copyDefaultName(key: string): string {
   }
   const base = key.substring(0, key.length - ext.length - 1);
   return `${base}-副本.${ext}`;
+}
+
+/// 列表去重键：同名桶可能分属不同区域
+function bucketKey(bucket: R2Bucket): string {
+  return `${r2JurisdictionHeader(bucket.jurisdiction)}|${bucket.name}`;
 }
 
 @ObservedV2
@@ -71,10 +89,10 @@ class BucketsVM {
     }
   }
 
-  async remove(bucket: string): Promise<string> {
+  async remove(bucket: R2Bucket): Promise<string> {
     try {
-      await this.service.deleteBucket(accountStore.selectedId, bucket);
-      this.buckets = this.buckets.filter((b: R2Bucket) => b.name !== bucket);
+      await this.service.deleteBucket(accountStore.selectedId, bucket.name, bucket.jurisdiction ?? '');
+      this.buckets = this.buckets.filter((b: R2Bucket) => bucketKey(b) !== bucketKey(bucket));
       return '';
     } catch (e) {
       return (e as Error).message ?? '删除失败（桶需先清空）';
@@ -168,25 +186,31 @@ export struct R2BucketsPage {
         } else {
           Refresh({ refreshing: this.refreshing }) {
             List() {
+              // 全账号带宽（近 30 天）；数据集不可用时整卡隐藏
+              ListItem() {
+                R2BandwidthCard()
+                  .margin({ top: 4, bottom: 6 })
+              }
               ForEach(this.vm.buckets, (bucket: R2Bucket) => {
                 ListItem() {
                   ResourceCard({
                     symbol: $r('sys.symbol.externaldrive'),
                     title: bucket.name,
                     subtitle: bucket.location ?? '',
+                    badge: r2JurisdictionLabel(bucket.jurisdiction),
                     onTap: () => {
-                      const param: NameParam = { name: bucket.name };
+                      const param: R2BucketParam = { name: bucket.name, jurisdiction: bucket.jurisdiction ?? '' };
                       this.pathStack?.pushPathByName(Routes.R2_OBJECTS, param);
                     },
                     onLongPress: () => {
-                      this.vm.remove(bucket.name).then((err: string) => {
+                      this.vm.remove(bucket).then((err: string) => {
                         this.toast(err === '' ? '已删除' : err);
                       });
                     },
                   })
                 }
                 .margin({ left: 16, right: 16, top: 5, bottom: 5 })
-              }, (bucket: R2Bucket) => bucket.name)
+              }, (bucket: R2Bucket) => bucketKey(bucket))
             }
             .width('100%')
             .height('100%')
@@ -244,6 +268,8 @@ class ObjectsVM {
   @Trace viewerText: string = '';
   @Trace viewerKey: string = '';
   @Trace isTransferring: boolean = false;
+  /// 桶的数据区域（'' / default = 不带 cf-r2-jurisdiction 头），进页时由路由参数设定
+  @Trace jurisdiction: string = '';
   private service: StorageService = new StorageService();
 
   /// 对象 key 去掉当前前缀 → 叶子名（当前层文件名）
@@ -285,7 +311,8 @@ class ObjectsVM {
     this.error = '';
     this.cursor = '';
     try {
-      const page: R2ObjectPage = await this.service.listObjects(accountStore.selectedId, bucket, this.currentPrefix, '');
+      const page: R2ObjectPage = await this.service.listObjects(accountStore.selectedId, bucket, this.currentPrefix, '',
+        this.jurisdiction);
       if (generation !== this.loadGeneration) {
         return;
       }
@@ -322,7 +349,8 @@ class ObjectsVM {
     const generation = this.loadGeneration;
     this.isLoadingMore = true;
     try {
-      const page: R2ObjectPage = await this.service.listObjects(accountStore.selectedId, bucket, this.currentPrefix, this.cursor);
+      const page: R2ObjectPage = await this.service.listObjects(accountStore.selectedId, bucket, this.currentPrefix, this.cursor,
+        this.jurisdiction);
       if (generation !== this.loadGeneration) {
         return; // 期间已换目录 / 刷新：这页不属于当前列表（finally 仍会复位 isLoadingMore）
       }
@@ -349,7 +377,7 @@ class ObjectsVM {
     this.viewerKey = key;
     this.viewerText = '正在加载…';
     try {
-      const text = await this.service.getObjectText(accountStore.selectedId, bucket, key);
+      const text = await this.service.getObjectText(accountStore.selectedId, bucket, key, this.jurisdiction);
       this.viewerText = text.length > 5000 ? `${text.substring(0, 5000)}\n…（已截断）` : text;
     } catch (e) {
       this.viewerText = `无法预览：${(e as Error).message ?? ''}`;
@@ -365,7 +393,7 @@ class ObjectsVM {
   /// 把对象字节写入 App 缓存目录的临时文件，返回沙箱路径（供 Preview Kit / 系统预览）
   private async downloadToCache(bucket: string, key: string): Promise<string> {
     const buffer = await withDataTransfer<ArrayBuffer>(() =>
-      this.service.getObjectBytes(accountStore.selectedId, bucket, key));
+      this.service.getObjectBytes(accountStore.selectedId, bucket, key, this.jurisdiction));
     const context = GlobalContext.get();
     const dir = context.cacheDir;
     // 前缀去重避免同名覆盖冲突；保留原叶子名让预览标题/后缀正确
@@ -411,7 +439,7 @@ class ObjectsVM {
       }
       const destUri = uris[0];
       const buffer = await withDataTransfer<ArrayBuffer>(() =>
-        this.service.getObjectBytes(accountStore.selectedId, bucket, key));
+        this.service.getObjectBytes(accountStore.selectedId, bucket, key, this.jurisdiction));
       const file = fileIo.openSync(destUri, fileIo.OpenMode.READ_WRITE | fileIo.OpenMode.TRUNC);
       fd = file.fd;
       fileIo.writeSync(fd, buffer);
@@ -430,7 +458,7 @@ class ObjectsVM {
 
   async remove(bucket: string, key: string): Promise<string> {
     try {
-      await this.service.deleteObject(accountStore.selectedId, bucket, key);
+      await this.service.deleteObject(accountStore.selectedId, bucket, key, this.jurisdiction);
       this.objects = this.objects.filter((o: R2Object) => o.key !== key);
       return '';
     } catch (e) {
@@ -447,13 +475,13 @@ class ObjectsVM {
     this.isTransferring = true;
     try {
       await withDataTransfer<void>(() =>
-        this.service.copyObject(accountStore.selectedId, bucket, sourceKey, destKey));
+        this.service.copyObject(accountStore.selectedId, bucket, sourceKey, destKey, this.jurisdiction));
       if (isMove) {
-        const written = await this.service.objectExists(accountStore.selectedId, bucket, destKey);
+        const written = await this.service.objectExists(accountStore.selectedId, bucket, destKey, this.jurisdiction);
         if (!written) {
           return '复制后未在目标确认到对象，已保留原对象未删除';
         }
-        await this.service.deleteObject(accountStore.selectedId, bucket, sourceKey);
+        await this.service.deleteObject(accountStore.selectedId, bucket, sourceKey, this.jurisdiction);
       }
       await this.load(bucket);
       return '';
@@ -467,7 +495,8 @@ class ObjectsVM {
   /// 上传文本对象（新建/覆盖），落在当前文件夹前缀下
   async upload(bucket: string, key: string, text: string): Promise<string> {
     try {
-      await this.service.putObjectText(accountStore.selectedId, bucket, this.currentPrefix + key, text, 'text/plain');
+      await this.service.putObjectText(accountStore.selectedId, bucket, this.currentPrefix + key, text, 'text/plain',
+        this.jurisdiction);
       await this.load(bucket);
       return '';
     } catch (e) {
@@ -495,7 +524,8 @@ class ObjectsVM {
       fileIo.readSync(fd, buffer);
       // 传输期间保持连续后台任务，允许上传在 App 切后台后继续
       await withDataTransfer<void>(() =>
-        this.service.putObjectBytes(accountStore.selectedId, bucket, key, buffer, 'application/octet-stream'));
+        this.service.putObjectBytes(accountStore.selectedId, bucket, key, buffer, 'application/octet-stream',
+          this.jurisdiction));
       await this.load(bucket);
       return '';
     } catch (e) {
@@ -1011,15 +1041,16 @@ export struct R2ObjectsPage {
       .width('100%')
       .height('100%')
     }
-    .titleBar({ style: { systemMaterialEffect: systemMaterial() }, content: { title: { mainTitle: this.bucket }, menu: { value: [{ content: { icon: $r('sys.symbol.gearshape'), label: '桶设置', action: () => { const param: IdNameParam = { id: this.bucket, name: this.bucket }; this.pathStack?.pushPathByName(Routes.R2_SETTINGS, param); } } }] } } })
+    .titleBar({ style: { systemMaterialEffect: systemMaterial() }, content: { title: { mainTitle: this.bucket, subTitle: r2JurisdictionLabel(this.vm.jurisdiction) }, menu: { value: [{ content: { icon: $r('sys.symbol.gearshape'), label: '桶设置', action: () => { const param: R2BucketParam = { name: this.bucket, jurisdiction: this.vm.jurisdiction }; this.pathStack?.pushPathByName(Routes.R2_SETTINGS, param); } } }] } } })
     .backgroundColor($r('sys.color.background_secondary'))
     .bindSheet(this.transferVisible, this.transferSheet(), ocSheet(() => {
       this.transferVisible = false;
     }))
     .onReady((context: NavDestinationContext) => {
       this.pathStack = context.pathStack;
-      const param = context.pathInfo.param as NameParam;
+      const param = context.pathInfo.param as R2BucketParam;
       this.bucket = param.name;
+      this.vm.jurisdiction = param.jurisdiction ?? '';
       this.vm.load(param.name).catch(() => {
       });
     })

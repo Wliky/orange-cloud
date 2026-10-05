@@ -161,6 +161,34 @@ struct WorkerDetailView: View {
                 ) {
                     WorkerLogsView(accountId: script.accountId, scriptName: script.id, session: session)
                 }
+                // Workers Issues：该 Worker 的活跃问题数，点进按 service 过滤的问题列表
+                if canViewIssues {
+                    NavigationLink {
+                        WorkerIssuesView(accountId: script.accountId, scriptName: script.id, session: session)
+                    } label: {
+                        HStack(spacing: 12) {
+                            TintIcon(systemImage: "exclamationmark.bubble", color: .ocOrange)
+                            Text("问题").foregroundStyle(.primary)
+                            Spacer()
+                            if let count = activeIssueCount {
+                                Text(count.formatted())
+                                    .font(.subheadline.weight(count > 0 ? .semibold : .regular))
+                                    .foregroundStyle(count > 0 ? Color.red : Color.secondary)
+                                    .monospacedDigit()
+                            }
+                        }
+                    }
+                } else {
+                    // 未解锁 / 缺 scope：沿用门控行的付费墙与重授权提示
+                    ProGatedNavigationLink(
+                        label: String(localized: "问题"),
+                        systemImage: "exclamationmark.bubble",
+                        requiredScope: "workers-observability.read",
+                        feature: .workerTail
+                    ) {
+                        WorkerIssuesView(accountId: script.accountId, scriptName: script.id, session: session)
+                    }
+                }
             }
             .glassRow()
         }

@@ -22,6 +22,7 @@ export class Routes {
   static readonly HEALTH_CHECK = 'healthCheck';
   static readonly DNS_SETTINGS = 'dnsSettings';
   static readonly REGISTRAR = 'registrar';
+  static readonly DOMAIN_SEARCH = 'domainSearch';
   static readonly REQUEST_TRACER = 'requestTracer';
   static readonly WORKER_BUILDS = 'workerBuilds';
   static readonly MANAGED_HEADERS = 'managedHeaders';
@@ -31,6 +32,7 @@ export class Routes {
   static readonly PHASE_RULES = 'phaseRules';
   static readonly PAGE_RULES = 'pageRules';
   static readonly URL_NORMALIZATION = 'urlNormalization';
+  static readonly SECURITY_INSIGHTS = 'securityInsights';
   // 账号级
   static readonly TUNNELS = 'tunnels';
   static readonly TUNNEL_DETAIL = 'tunnelDetail';
@@ -57,6 +59,8 @@ export class Routes {
   static readonly WORKER_DEPLOYMENTS = 'workerDeployments';
   static readonly TAIL = 'tail';
   static readonly WORKER_LOGS = 'workerLogs';
+  static readonly WORKER_ISSUES = 'workerIssues';
+  static readonly WORKER_ISSUE_DETAIL = 'workerIssueDetail';
   static readonly PAGES = 'pages';
   static readonly PAGES_DETAIL = 'pagesDetail';
   static readonly PAGES_DEPLOYMENT = 'pagesDeployment';
@@ -141,6 +145,23 @@ export interface PhaseRulesParam {
   zoneName: string;
   phase: string;
   title: string;
+}
+
+/// Workers 问题列表：service 为 Worker 名（空 = 账号下全部 Worker）
+export interface WorkerIssuesParam {
+  service: string;
+}
+
+/// Workers 问题详情：问题 ID + 标题（详情回来前先显示）
+export interface WorkerIssueParam {
+  issueId: string;
+  title: string;
+}
+
+/// R2 存储桶：桶名 + 数据区域（'' / default = 不限区域；eu / us / fedramp… 需带 cf-r2-jurisdiction 头）
+export interface R2BucketParam {
+  name: string;
+  jurisdiction?: string;
 }
 
 /// Pages 部署详情：项目名 + 部署 ID + 是否生产环境

@@ -38,6 +38,8 @@ data class WafUiState(
     val canWrite: Boolean = false,
     /** 启停请求在途的规则 id，期间禁用其开关防连点。 */
     val togglingIds: Set<String> = emptySet(),
+    /** 编辑器里「校验」（dry_run）的结果；打开 / 关闭编辑器时清空。 */
+    val validation: RuleValidation? = null,
 )
 
 @HiltViewModel
@@ -101,7 +103,7 @@ class WafRulesViewModel @Inject constructor(
                 _uiState.update { s ->
                     s.copy(rules = s.rules.map { if (it.id == rule.id) it.copy(enabled = rule.enabled) else it })
                 }
-                eventChannel.send(WafEvent.Error(e.message))
+                eventChannel.send(WafEvent.Error(e.message, e.cfDocumentationUrl))
             } finally {
                 _uiState.update { it.copy(togglingIds = it.togglingIds - rule.id) }
             }

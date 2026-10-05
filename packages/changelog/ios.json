@@ -1,5 +1,243 @@
 [
   {
+    "version": "2.2.0",
+    "date": "2026.10.05",
+    "channel": "App Store",
+    "items": [
+      {
+        "icon": "ant",
+        "title": {
+          "zh-Hans": "AI 爬虫分类管控",
+          "en": "AI crawlers by type",
+          "zh-Hant": "AI 爬蟲分類管控",
+          "zh-HK": "AI 爬蟲分類管控",
+          "ja": "AI クローラーを種類別に管理",
+          "es-MX": "Rastreadores de IA por tipo",
+          "ko": "AI 크롤러 유형별 관리",
+          "pt-BR": "Rastreadores de IA por tipo",
+          "pt-PT": "Rastreadores de IA por tipo",
+          "de": "KI-Crawler nach Art steuern",
+          "fr": "Robots d’IA par catégorie",
+          "ar": "زواحف الذكاء الاصطناعي حسب النوع",
+          "tr": "Yapay zekâ tarayıcıları türe göre"
+        },
+        "detail": {
+          "zh-Hans": "AI 搜索、AI 助手与 Agent、AI 训练三类爬虫可以分别设置拦截方式，还能按偏好自动生成 robots.txt；新增会话级机器人检测（Precursor）。",
+          "en": "Set AI Search, AI Assistants & Agents and AI Training crawlers separately, and let Cloudflare generate robots.txt from your preferences. Session-level bot detection (Precursor) is new too.",
+          "zh-Hant": "AI 搜尋、AI 助理與 Agent、AI 訓練三類爬蟲可分別設定攔截方式，還能依偏好自動產生 robots.txt；新增工作階段層級機器人偵測（Precursor）。",
+          "zh-HK": "AI 搜尋、AI 助手與 Agent、AI 訓練三類爬蟲可分別設定攔截方式，亦可按偏好自動生成 robots.txt；新增會話級機械人偵測（Precursor）。",
+          "ja": "AI 検索、AI アシスタントとエージェント、AI トレーニングの 3 種類のクローラーを個別に設定でき、設定に基づいて robots.txt を自動生成できます。セッション単位のボット検出（Precursor）にも対応しました。",
+          "es-MX": "Configura por separado la búsqueda con IA, los asistentes y agentes de IA y el entrenamiento de IA, y deja que Cloudflare genere el robots.txt según tus preferencias. También llega la detección de bots por sesión (Precursor).",
+          "ko": "AI 검색, AI 어시스턴트 및 에이전트, AI 학습 크롤러를 각각 설정하고 설정에 따라 robots.txt를 자동으로 생성할 수 있습니다. 세션 단위 봇 탐지(Precursor)도 추가되었습니다.",
+          "pt-BR": "Configure separadamente a busca com IA, os assistentes e agentes de IA e o treinamento de IA, e deixe a Cloudflare gerar o robots.txt pelas suas preferências. A detecção de bots por sessão (Precursor) também chegou.",
+          "pt-PT": "Configure separadamente a pesquisa com IA, os assistentes e agentes de IA e o treino de IA, e deixe a Cloudflare gerar o robots.txt pelas suas preferências. Chega também a deteção de bots por sessão (Precursor).",
+          "de": "KI-Suche, KI-Assistenten & Agenten sowie KI-Training lassen sich getrennt einstellen, und Cloudflare erzeugt die robots.txt aus Ihren Präferenzen. Neu ist außerdem die Bot-Erkennung auf Sitzungsebene (Precursor).",
+          "fr": "Réglez séparément la recherche IA, les assistants et agents IA et l’entraînement d’IA, et laissez Cloudflare générer le robots.txt selon vos préférences. La détection des bots au niveau de la session (Precursor) arrive aussi.",
+          "ar": "اضبط البحث بالذكاء الاصطناعي ومساعدي ووكلاء الذكاء الاصطناعي وتدريب الذكاء الاصطناعي كلًّا على حدة، ودع Cloudflare تُنشئ ملف robots.txt وفق تفضيلاتك. وأُضيف أيضًا كشف الروبوتات على مستوى الجلسة (Precursor).",
+          "tr": "Yapay zekâ araması, yapay zekâ asistanları ve ajanlar ile yapay zekâ eğitimi tarayıcılarını ayrı ayrı ayarlayın; robots.txt tercihlerinize göre otomatik oluşturulsun. Oturum düzeyinde bot algılama (Precursor) da eklendi."
+        }
+      },
+      {
+        "icon": "exclamationmark.triangle",
+        "title": {
+          "zh-Hans": "Workers 问题一览",
+          "en": "Workers issues at a glance",
+          "zh-Hant": "Workers 問題一覽",
+          "zh-HK": "Workers 問題一覽",
+          "ja": "Workers の問題をひと目で",
+          "es-MX": "Problemas de Workers de un vistazo",
+          "ko": "Workers 문제 한눈에 보기",
+          "pt-BR": "Problemas dos Workers em um só lugar",
+          "pt-PT": "Problemas dos Workers num só lugar",
+          "de": "Workers-Probleme auf einen Blick",
+          "fr": "Les problèmes des Workers d’un coup d’œil",
+          "ar": "مشكلات Workers في لمحة",
+          "tr": "Workers sorunları tek bakışta"
+        },
+        "detail": {
+          "zh-Hans": "自动汇总 Worker 的未捕获异常、5xx 响应和错误日志，可以标记为已解决或忽略；Worker 详情里还能看到预览地址。",
+          "en": "Uncaught exceptions, 5xx responses and error logs from your Workers are grouped into issues you can resolve or ignore. Worker details now list preview URLs too.",
+          "zh-Hant": "自動彙整 Worker 的未捕捉例外、5xx 回應與錯誤日誌，可標記為已解決或忽略；Worker 詳情中也能看到預覽網址。",
+          "zh-HK": "自動整合 Worker 的未捕捉例外、5xx 回應及錯誤日誌，可標記為已解決或忽略；Worker 詳情亦可查看預覽網址。",
+          "ja": "Worker の未処理の例外、5xx 応答、エラーログを問題としてまとめ、解決済みにしたり無視したりできます。Worker の詳細ではプレビュー URL も確認できます。",
+          "es-MX": "Las excepciones no capturadas, las respuestas 5xx y los registros de error de tus Workers se agrupan en problemas que puedes resolver o ignorar. El detalle de cada Worker muestra también sus URL de vista previa.",
+          "ko": "Worker의 처리되지 않은 예외, 5xx 응답, 오류 로그를 문제로 묶어 해결됨으로 표시하거나 무시할 수 있습니다. Worker 상세 화면에서 미리보기 URL도 확인할 수 있습니다.",
+          "pt-BR": "Exceções não tratadas, respostas 5xx e logs de erro dos seus Workers viram problemas que você pode marcar como resolvidos ou ignorar. Os detalhes do Worker também mostram as URLs de pré-visualização.",
+          "pt-PT": "As exceções não tratadas, respostas 5xx e registos de erro dos seus Workers são agrupados em problemas que pode marcar como resolvidos ou ignorar. Os detalhes do Worker mostram também os URLs de pré-visualização.",
+          "de": "Unbehandelte Ausnahmen, 5xx-Antworten und Fehlerlogs Ihrer Workers werden zu Problemen gebündelt, die Sie als gelöst markieren oder ignorieren können. Die Worker-Details zeigen jetzt auch die Vorschau-URLs.",
+          "fr": "Les exceptions non gérées, réponses 5xx et journaux d’erreurs de vos Workers sont regroupés en problèmes que vous pouvez marquer comme résolus ou ignorer. Le détail d’un Worker affiche aussi ses URL d’aperçu.",
+          "ar": "تُجمَّع الاستثناءات غير المعالَجة واستجابات 5xx وسجلات الأخطاء في Workers ضمن مشكلات يمكنك وسمها بأنها حُلَّت أو تجاهلها. وتعرض تفاصيل Worker الآن روابط المعاينة أيضًا.",
+          "tr": "Workers'taki yakalanmamış istisnalar, 5xx yanıtları ve hata günlükleri çözüldü olarak işaretleyebileceğiniz ya da yok sayabileceğiniz sorunlar hâlinde toplanır. Worker ayrıntılarında önizleme adresleri de görünür."
+        }
+      },
+      {
+        "icon": "checkmark.shield",
+        "title": {
+          "zh-Hans": "安全洞察",
+          "en": "Security Insights",
+          "zh-Hant": "安全洞察",
+          "zh-HK": "安全洞察",
+          "ja": "セキュリティインサイト",
+          "es-MX": "Información de seguridad",
+          "ko": "보안 인사이트",
+          "pt-BR": "Insights de segurança",
+          "pt-PT": "Informações de segurança",
+          "de": "Sicherheitseinblicke",
+          "fr": "Analyses de sécurité",
+          "ar": "رؤى الأمان",
+          "tr": "Güvenlik içgörüleri"
+        },
+        "detail": {
+          "zh-Hans": "一键扫描域名的安全隐患，按严重程度查看和处理。",
+          "en": "Scan a domain for security issues in one tap, then review and dismiss them by severity.",
+          "zh-Hant": "一鍵掃描網域的安全隱患，依嚴重程度檢視與處理。",
+          "zh-HK": "一按即可掃描網域的安全隱患，按嚴重程度查看及處理。",
+          "ja": "ワンタップでドメインのセキュリティ上の問題をスキャンし、重大度別に確認・対応できます。",
+          "es-MX": "Analiza un dominio en busca de problemas de seguridad con un toque y revísalos según su gravedad.",
+          "ko": "한 번의 탭으로 도메인의 보안 문제를 검사하고 심각도별로 확인하고 처리할 수 있습니다.",
+          "pt-BR": "Verifique os problemas de segurança de um domínio com um toque e analise-os por gravidade.",
+          "pt-PT": "Analise um domínio em busca de problemas de segurança com um toque e reveja-os por gravidade.",
+          "de": "Prüfen Sie eine Domain mit einem Tippen auf Sicherheitsprobleme und bearbeiten Sie sie nach Schweregrad.",
+          "fr": "Analysez un domaine en un geste pour repérer les failles de sécurité, puis traitez-les par gravité.",
+          "ar": "افحص النطاق بحثًا عن مشكلات الأمان بلمسة واحدة، ثم راجعها وعالجها حسب درجة خطورتها.",
+          "tr": "Bir alan adını tek dokunuşla güvenlik sorunlarına karşı tarayın, sorunları önem derecesine göre inceleyin."
+        }
+      },
+      {
+        "icon": "chart.bar.xaxis",
+        "title": {
+          "zh-Hans": "更细的流量分析",
+          "en": "Deeper traffic analytics",
+          "zh-Hant": "更細的流量分析",
+          "zh-HK": "更細緻的流量分析",
+          "ja": "より詳しいトラフィック分析",
+          "es-MX": "Análisis de tráfico más detallado",
+          "ko": "더 자세한 트래픽 분석",
+          "pt-BR": "Análise de tráfego mais detalhada",
+          "pt-PT": "Análise de tráfego mais detalhada",
+          "de": "Genauere Traffic-Analyse",
+          "fr": "Analyse du trafic plus fine",
+          "ar": "تحليلات زيارات أدق",
+          "tr": "Daha ayrıntılı trafik analizi"
+        },
+        "detail": {
+          "zh-Hans": "新增访问明细（国家/地区、状态码、路径、主机名）与安全事件。",
+          "en": "New Traffic Breakdown by country or region, status code, path and hostname, plus Security Events.",
+          "zh-Hant": "新增存取明細（國家/地區、狀態碼、路徑、主機名稱）與安全事件。",
+          "zh-HK": "新增訪問明細（國家/地區、狀態碼、路徑、主機名稱）及安全事件。",
+          "ja": "国・地域、ステータスコード、パス、ホスト名別のアクセス内訳と、セキュリティイベントを追加しました。",
+          "es-MX": "Nuevo desglose del tráfico por país o región, código de estado, ruta y nombre de host, además de eventos de seguridad.",
+          "ko": "국가/지역, 상태 코드, 경로, 호스트 이름별 접속 세부 정보와 보안 이벤트가 추가되었습니다.",
+          "pt-BR": "Novos detalhes do tráfego por país ou região, código de status, caminho e nome do host, além de eventos de segurança.",
+          "pt-PT": "Novos detalhes do tráfego por país ou região, código de estado, caminho e nome do anfitrião, além de eventos de segurança.",
+          "de": "Neue Zugriffsdetails nach Land oder Region, Statuscode, Pfad und Hostname sowie Sicherheitsereignisse.",
+          "fr": "Nouveau détail du trafic par pays ou région, code d’état, chemin et nom d’hôte, ainsi que les événements de sécurité.",
+          "ar": "تفاصيل زيارات جديدة حسب البلد أو المنطقة ورمز الحالة والمسار واسم المضيف، إلى جانب الأحداث الأمنية.",
+          "tr": "Ülke veya bölge, durum kodu, yol ve ana bilgisayar adına göre yeni trafik dökümü ile güvenlik olayları eklendi."
+        }
+      },
+      {
+        "icon": "arrow.clockwise",
+        "title": {
+          "zh-Hans": "缓存与规则",
+          "en": "Cache and rules",
+          "zh-Hant": "快取與規則",
+          "zh-HK": "緩存與規則",
+          "ja": "キャッシュとルール",
+          "es-MX": "Caché y reglas",
+          "ko": "캐시와 규칙",
+          "pt-BR": "Cache e regras",
+          "pt-PT": "Cache e regras",
+          "de": "Cache und Regeln",
+          "fr": "Cache et règles",
+          "ar": "التخزين المؤقت والقواعد",
+          "tr": "Önbellek ve kurallar"
+        },
+        "detail": {
+          "zh-Hans": "缓存可以「标记过期」，交给源站校验后再更新；新增缓存响应规则；WAF 与缓存规则保存前可以先校验。",
+          "en": "Mark cached content as stale so it revalidates with your origin instead of being purged. Cache Response Rules are new, and WAF and cache rules can be validated before you save.",
+          "zh-Hant": "快取可「標記過期」，交由來源伺服器驗證後再更新；新增快取回應規則；WAF 與快取規則儲存前可先驗證。",
+          "zh-HK": "緩存可「標記過期」，交由源站校驗後再更新；新增緩存回應規則；WAF 與緩存規則儲存前可先校驗。",
+          "ja": "キャッシュを「期限切れにする」と、削除せずにオリジンで再検証してから更新します。キャッシュレスポンスルールを追加し、WAF とキャッシュルールは保存前に検証できます。",
+          "es-MX": "Marca el contenido en caché como obsoleto para que se revalide con tu origen en lugar de purgarse. Llegan las reglas de respuesta de caché, y las reglas de WAF y de caché se pueden validar antes de guardar.",
+          "ko": "캐시를 만료로 표시하면 삭제하지 않고 원본 서버에서 재검증한 뒤 갱신합니다. 캐시 응답 규칙이 추가되었고, WAF와 캐시 규칙은 저장 전에 검증할 수 있습니다.",
+          "pt-BR": "Marque o conteúdo em cache como expirado para que seja revalidado na origem em vez de apagado. Chegaram as regras de resposta de cache, e as regras de WAF e de cache podem ser validadas antes de salvar.",
+          "pt-PT": "Marque o conteúdo em cache como expirado para que seja revalidado na origem em vez de apagado. Chegam as regras de resposta da cache, e as regras de WAF e de cache podem ser validadas antes de guardar.",
+          "de": "Markieren Sie Cache-Inhalte als veraltet, damit sie beim Ursprungsserver neu validiert statt gelöscht werden. Neu sind Cache-Antwortregeln, und WAF- sowie Cache-Regeln lassen sich vor dem Speichern prüfen.",
+          "fr": "Marquez le contenu en cache comme obsolète pour qu’il soit revalidé auprès de l’origine plutôt que purgé. Les règles de réponse du cache arrivent, et les règles WAF et de cache peuvent être validées avant l’enregistrement.",
+          "ar": "ضع علامة «منتهي الصلاحية» على المحتوى المخزَّن مؤقتًا ليُعاد التحقق منه لدى الخادم الأصلي بدل حذفه. وأُضيفت قواعد استجابة التخزين المؤقت، وصار بالإمكان التحقق من قواعد WAF والتخزين المؤقت قبل حفظها.",
+          "tr": "Önbellekteki içeriği silmek yerine eskimiş olarak işaretleyin; kaynak sunucuda yeniden doğrulansın. Önbellek yanıt kuralları eklendi; WAF ve önbellek kuralları kaydetmeden önce doğrulanabilir."
+        }
+      },
+      {
+        "icon": "externaldrive",
+        "title": {
+          "zh-Hans": "存储、DNS 与域名",
+          "en": "Storage, DNS and domains",
+          "zh-Hant": "儲存、DNS 與網域",
+          "zh-HK": "儲存、DNS 與域名",
+          "ja": "ストレージ、DNS、ドメイン",
+          "es-MX": "Almacenamiento, DNS y dominios",
+          "ko": "스토리지, DNS, 도메인",
+          "pt-BR": "Armazenamento, DNS e domínios",
+          "pt-PT": "Armazenamento, DNS e domínios",
+          "de": "Speicher, DNS und Domains",
+          "fr": "Stockage, DNS et domaines",
+          "ar": "التخزين وDNS والنطاقات",
+          "tr": "Depolama, DNS ve alan adları"
+        },
+        "detail": {
+          "zh-Hans": "支持欧盟、美国数据驻留的 R2 存储桶和 KV 命名空间，R2 可看上传与下载带宽；DNS 标出被 NS 委派遮蔽的记录；可以搜索新域名并查看价格。",
+          "en": "R2 buckets and KV namespaces with EU or US data residency are supported, and R2 shows upload and download bandwidth. DNS flags records shadowed by an NS delegation, and you can search for new domains with prices.",
+          "zh-Hant": "支援歐盟、美國資料駐留的 R2 儲存桶與 KV 命名空間，R2 可查看上傳與下載頻寬；DNS 標示被 NS 委派遮蔽的記錄；可搜尋新網域並查看價格。",
+          "zh-HK": "支援歐盟、美國數據駐留的 R2 儲存桶及 KV 命名空間，R2 可查看上載及下載頻寬；DNS 標示被 NS 委派遮蔽的記錄；可搜尋新域名並查看價格。",
+          "ja": "EU・米国のデータ所在地を指定した R2 バケットと KV 名前空間に対応し、R2 ではアップロードとダウンロードの帯域幅を確認できます。DNS は NS 委任でシャドウされたレコードを表示し、新しいドメインを価格付きで検索できます。",
+          "es-MX": "Compatibilidad con buckets de R2 y espacios de nombres de KV con residencia de datos en la UE o EE. UU.; R2 muestra el ancho de banda de subida y bajada. DNS marca los registros sombreados por una delegación NS, y puedes buscar dominios nuevos con precios.",
+          "ko": "EU·미국 데이터 저장 위치를 지정한 R2 버킷과 KV 네임스페이스를 지원하며, R2에서 업로드·다운로드 대역폭을 확인할 수 있습니다. DNS는 NS 위임으로 가려진 레코드를 표시하고, 새 도메인을 가격과 함께 검색할 수 있습니다.",
+          "pt-BR": "Suporte a buckets R2 e namespaces KV com residência de dados na UE ou nos EUA; o R2 mostra a largura de banda de upload e download. O DNS sinaliza registros sombreados por uma delegação NS, e você pode buscar novos domínios com preços.",
+          "pt-PT": "Suporte para buckets R2 e namespaces KV com residência de dados na UE ou nos EUA; o R2 mostra a largura de banda de carregamento e transferência. O DNS assinala registos sombreados por uma delegação NS, e pode pesquisar novos domínios com preços.",
+          "de": "R2-Buckets und KV-Namespaces mit Datenresidenz in der EU oder den USA werden unterstützt, und R2 zeigt die Upload- und Download-Bandbreite. DNS markiert durch eine NS-Delegierung überschattete Einträge, und Sie können neue Domains mit Preisen suchen.",
+          "fr": "Prise en charge des buckets R2 et espaces de noms KV avec résidence des données dans l’UE ou aux États-Unis ; R2 affiche la bande passante d’envoi et de téléchargement. Le DNS signale les enregistrements masqués par une délégation NS, et vous pouvez rechercher de nouveaux domaines avec leurs prix.",
+          "ar": "دعم حاويات R2 ومساحات أسماء KV مع تخزين البيانات في الاتحاد الأوروبي أو الولايات المتحدة، ويعرض R2 عرض النطاق للرفع والتنزيل. ويُبرز DNS السجلات المحجوبة بتفويض NS، ويمكنك البحث عن نطاقات جديدة مع أسعارها.",
+          "tr": "AB veya ABD veri yerleşimli R2 kovaları ve KV ad alanları destekleniyor; R2 yükleme ve indirme bant genişliğini gösteriyor. DNS, bir NS yetkilendirmesiyle gölgelenen kayıtları işaretliyor; fiyatlarıyla birlikte yeni alan adları arayabilirsiniz."
+        }
+      },
+      {
+        "icon": "wrench.and.screwdriver",
+        "title": {
+          "zh-Hans": "更稳",
+          "en": "Steadier",
+          "zh-Hant": "更穩定",
+          "zh-HK": "更穩定",
+          "ja": "安定性の向上",
+          "es-MX": "Más estable",
+          "ko": "안정성 향상",
+          "pt-BR": "Mais estável",
+          "pt-PT": "Mais estável",
+          "de": "Stabiler",
+          "fr": "Plus fiable",
+          "ar": "ثبات أكبر",
+          "tr": "Daha sağlam"
+        },
+        "detail": {
+          "zh-Hans": "免费套餐不再显示开不了的 AI 内容开关；权限不足时可以直接查看所需权限；D1 超出免费额度时给出明确说明。",
+          "en": "AI content switches that can’t be turned on are hidden on the Free plan, permission errors link to the permissions you need, and D1 explains when the free daily limit is reached.",
+          "zh-Hant": "免費方案不再顯示無法開啟的 AI 內容開關；權限不足時可直接查看所需權限；D1 超出免費額度時會清楚說明。",
+          "zh-HK": "免費計劃不再顯示無法開啟的 AI 內容開關；權限不足時可直接查看所需權限；D1 超出免費額度時會清楚說明。",
+          "ja": "無料プランでは有効にできない AI コンテンツのスイッチを表示しなくなりました。権限が足りないときは必要な権限を確認でき、D1 の無料枠を超えたときははっきり説明します。",
+          "es-MX": "En el plan Free se ocultan los interruptores de contenido de IA que no se pueden activar, los errores de permisos enlazan a los permisos necesarios y D1 avisa cuando se alcanza el límite diario gratuito.",
+          "ko": "무료 플랜에서는 켤 수 없는 AI 콘텐츠 스위치를 숨기고, 권한 오류에서 필요한 권한을 바로 확인할 수 있으며, D1 무료 한도에 도달하면 명확히 안내합니다.",
+          "pt-BR": "No plano Free, os interruptores de conteúdo de IA que não podem ser ativados ficam ocultos, erros de permissão levam às permissões necessárias e o D1 avisa quando o limite diário gratuito é atingido.",
+          "pt-PT": "No plano Free, os interruptores de conteúdo de IA que não podem ser ativados ficam ocultos, os erros de permissão levam às permissões necessárias e o D1 avisa quando o limite diário gratuito é atingido.",
+          "de": "Im Free-Tarif werden KI-Inhaltsschalter ausgeblendet, die sich nicht aktivieren lassen, Berechtigungsfehler verlinken auf die nötigen Berechtigungen, und D1 erklärt, wenn das kostenlose Tageslimit erreicht ist.",
+          "fr": "Avec l’offre Free, les interrupteurs de contenu IA impossibles à activer sont masqués, les erreurs d’autorisation renvoient vers les autorisations nécessaires et D1 indique clairement quand la limite quotidienne gratuite est atteinte.",
+          "ar": "تُخفى في الخطة المجانية مفاتيح محتوى الذكاء الاصطناعي التي لا يمكن تفعيلها، وتربط أخطاء الأذونات بالأذونات المطلوبة، ويوضح D1 متى يُبلَغ الحد اليومي المجاني.",
+          "tr": "Ücretsiz planda açılamayan yapay zekâ içerik anahtarları gizleniyor, izin hataları gereken izinlere bağlantı veriyor ve D1 ücretsiz günlük sınıra ulaşıldığında bunu açıkça belirtiyor."
+        }
+      }
+    ]
+  },
+  {
     "version": "2.1.4",
     "date": "2026.09.19",
     "channel": "App Store",

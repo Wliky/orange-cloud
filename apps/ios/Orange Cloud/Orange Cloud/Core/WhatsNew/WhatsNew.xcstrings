@@ -1,6 +1,158 @@
 {
   "sourceLanguage": "zh-Hans",
   "strings": {
+    "AI 搜索、AI 助手与 Agent、AI 训练三类爬虫可以分别设置拦截方式，还能按偏好自动生成 robots.txt；新增会话级机器人检测（Precursor）。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set AI Search, AI Assistants & Agents and AI Training crawlers separately, and let Cloudflare generate robots.txt from your preferences. Session-level bot detection (Precursor) is new too."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 搜尋、AI 助理與 Agent、AI 訓練三類爬蟲可分別設定攔截方式，還能依偏好自動產生 robots.txt；新增工作階段層級機器人偵測（Precursor）。"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 搜尋、AI 助手與 Agent、AI 訓練三類爬蟲可分別設定攔截方式，亦可按偏好自動生成 robots.txt；新增會話級機械人偵測（Precursor）。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 検索、AI アシスタントとエージェント、AI トレーニングの 3 種類のクローラーを個別に設定でき、設定に基づいて robots.txt を自動生成できます。セッション単位のボット検出（Precursor）にも対応しました。"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configura por separado la búsqueda con IA, los asistentes y agentes de IA y el entrenamiento de IA, y deja que Cloudflare genere el robots.txt según tus preferencias. También llega la detección de bots por sesión (Precursor)."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 검색, AI 어시스턴트 및 에이전트, AI 학습 크롤러를 각각 설정하고 설정에 따라 robots.txt를 자동으로 생성할 수 있습니다. 세션 단위 봇 탐지(Precursor)도 추가되었습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure separadamente a busca com IA, os assistentes e agentes de IA e o treinamento de IA, e deixe a Cloudflare gerar o robots.txt pelas suas preferências. A detecção de bots por sessão (Precursor) também chegou."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure separadamente a pesquisa com IA, os assistentes e agentes de IA e o treino de IA, e deixe a Cloudflare gerar o robots.txt pelas suas preferências. Chega também a deteção de bots por sessão (Precursor)."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KI-Suche, KI-Assistenten & Agenten sowie KI-Training lassen sich getrennt einstellen, und Cloudflare erzeugt die robots.txt aus Ihren Präferenzen. Neu ist außerdem die Bot-Erkennung auf Sitzungsebene (Precursor)."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réglez séparément la recherche IA, les assistants et agents IA et l’entraînement d’IA, et laissez Cloudflare générer le robots.txt selon vos préférences. La détection des bots au niveau de la session (Precursor) arrive aussi."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اضبط البحث بالذكاء الاصطناعي ومساعدي ووكلاء الذكاء الاصطناعي وتدريب الذكاء الاصطناعي كلًّا على حدة، ودع Cloudflare تُنشئ ملف robots.txt وفق تفضيلاتك. وأُضيف أيضًا كشف الروبوتات على مستوى الجلسة (Precursor)."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yapay zekâ araması, yapay zekâ asistanları ve ajanlar ile yapay zekâ eğitimi tarayıcılarını ayrı ayrı ayarlayın; robots.txt tercihlerinize göre otomatik oluşturulsun. Oturum düzeyinde bot algılama (Precursor) da eklendi."
+          }
+        }
+      }
+    },
+    "AI 爬虫分类管控": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI crawlers by type"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 爬蟲分類管控"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 爬蟲分類管控"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI クローラーを種類別に管理"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rastreadores de IA por tipo"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 크롤러 유형별 관리"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rastreadores de IA por tipo"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rastreadores de IA por tipo"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KI-Crawler nach Art steuern"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Robots d’IA par catégorie"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "زواحف الذكاء الاصطناعي حسب النوع"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yapay zekâ tarayıcıları türe göre"
+          }
+        }
+      }
+    },
     "App 现在可以横过来用，宽屏上内容会收在舒适的阅读宽度里，不再被拉得很长；顺带修好了域名页偶尔打开是一片空白的问题。": {
       "localizations": {
         "en": {
@@ -8665,6 +8817,82 @@
         }
       }
     },
+    "更稳": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steadier"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更穩定"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更穩定"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安定性の向上"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Más estable"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "안정성 향상"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mais estável"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mais estável"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stabiler"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plus fiable"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ثبات أكبر"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daha sağlam"
+          }
+        }
+      }
+    },
     "更稳，少打扰": {
       "localizations": {
         "en": {
@@ -8737,6 +8965,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "Daha kararlı, daha az kesinti"
+          }
+        }
+      }
+    },
+    "更细的流量分析": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deeper traffic analytics"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更細的流量分析"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更細緻的流量分析"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "より詳しいトラフィック分析"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Análisis de tráfico más detallado"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "더 자세한 트래픽 분석"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Análise de tráfego mais detalhada"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Análise de tráfego mais detalhada"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genauere Traffic-Analyse"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyse du trafic plus fine"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحليلات زيارات أدق"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daha ayrıntılı trafik analizi"
           }
         }
       }
@@ -11929,6 +12233,82 @@
           "stringUnit": {
             "state": "translated",
             "value": "Genel Wi-Fi giriş sayfası veya WAF doğrulaması gibi engellenen bir ağ artık oturumunuzu yanlışlıkla kapatmıyor. Açılışta ara sıra yaşanan çökme giderildi; aşağı çekerek yenilerken veya zaman aralığını hızla değiştirirken artık “İptal edildi” ya da karışık veriler görünmüyor."
+          }
+        }
+      }
+    },
+    "自动汇总 Worker 的未捕获异常、5xx 响应和错误日志，可以标记为已解决或忽略；Worker 详情里还能看到预览地址。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uncaught exceptions, 5xx responses and error logs from your Workers are grouped into issues you can resolve or ignore. Worker details now list preview URLs too."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動彙整 Worker 的未捕捉例外、5xx 回應與錯誤日誌，可標記為已解決或忽略；Worker 詳情中也能看到預覽網址。"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動整合 Worker 的未捕捉例外、5xx 回應及錯誤日誌，可標記為已解決或忽略；Worker 詳情亦可查看預覽網址。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Worker の未処理の例外、5xx 応答、エラーログを問題としてまとめ、解決済みにしたり無視したりできます。Worker の詳細ではプレビュー URL も確認できます。"
+          }
+        },
+        "es-MX": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las excepciones no capturadas, las respuestas 5xx y los registros de error de tus Workers se agrupan en problemas que puedes resolver o ignorar. El detalle de cada Worker muestra también sus URL de vista previa."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Worker의 처리되지 않은 예외, 5xx 응답, 오류 로그를 문제로 묶어 해결됨으로 표시하거나 무시할 수 있습니다. Worker 상세 화면에서 미리보기 URL도 확인할 수 있습니다."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exceções não tratadas, respostas 5xx e logs de erro dos seus Workers viram problemas que você pode marcar como resolvidos ou ignorar. Os detalhes do Worker também mostram as URLs de pré-visualização."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As exceções não tratadas, respostas 5xx e registos de erro dos seus Workers são agrupados em problemas que pode marcar como resolvidos ou ignorar. Os detalhes do Worker mostram também os URLs de pré-visualização."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unbehandelte Ausnahmen, 5xx-Antworten und Fehlerlogs Ihrer Workers werden zu Problemen gebündelt, die Sie als gelöst markieren oder ignorieren können. Die Worker-Details zeigen jetzt auch die Vorschau-URLs."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les exceptions non gérées, réponses 5xx et journaux d’erreurs de vos Workers sont regroupés en problèmes que vous pouvez marquer comme résolus ou ignorer. Le détail d’un Worker affiche aussi ses URL d’aperçu."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تُجمَّع الاستثناءات غير المعالَجة واستجابات 5xx وسجلات الأخطاء في Workers ضمن مشكلات يمكنك وسمها بأنها حُلَّت أو تجاهلها. وتعرض تفاصيل Worker الآن روابط المعاينة أيضًا."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workers'taki yakalanmamış istisnalar, 5xx yanıtları ve hata günlükleri çözüldü olarak işaretleyebileceğiniz ya da yok sayabileceğiniz sorunlar hâlinde toplanır. Worker ayrıntılarında önizleme adresleri de görünür."
           }
         }
       }
